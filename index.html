@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우체국 택배 월별 현황 보고</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ── reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+       background: #f0f2f7; color: #1a2332; font-size: 14px; }
+
+/* ── header ── */
+.header { background: linear-gradient(135deg, #1a3c5e 0%, #2a78d6 100%);
+          color: #fff; padding: 28px 40px 24px; }
+.header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+.header-meta { font-size: 12px; opacity: 0.75; display: flex; gap: 20px; flex-wrap: wrap; }
+.header-meta span { display: flex; align-items: center; gap: 4px; }
+
+/* ── month nav ── */
+.month-nav { background: #fff; border-bottom: 1px solid #e2e6ef;
+             padding: 10px 40px; display: flex; align-items: center; gap: 8px; }
+.month-nav label { font-size: 12px; color: #555; font-weight: 600; }
+.month-nav select { border: 1px solid #c8d0de; border-radius: 6px; padding: 5px 10px;
+                    font-size: 13px; color: #1a2332; background: #fff; cursor: pointer; }
+
+/* ── layout ── */
+.container { max-width: 1160px; margin: 0 auto; padding: 28px 24px; }
+.section-title { font-size: 13px; font-weight: 700; color: #1a3c5e;
+                 margin-bottom: 14px; padding-left: 10px;
+                 border-left: 4px solid #2a78d6; }
+
+/* ── KPI tiles ── */
+.kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+.kpi { background: #fff; border-radius: 12px; padding: 18px 22px;
+       box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+.kpi-label { font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px; }
+.kpi-val { font-size: 30px; font-weight: 800; color: #1a3c5e; line-height: 1.1; }
+.kpi-val span { font-size: 14px; font-weight: 400; color: #888; margin-left: 2px; }
+.kpi-delta { font-size: 12px; font-weight: 700; margin-top: 6px; }
+.up   { color: #1baf7a; }
+.down { color: #eb6834; }
+.neutral { color: #888; }
+
+/* ── cards ── */
+.card { background: #fff; border-radius: 12px; padding: 22px 24px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 22px; }
+.chart-wrap { position: relative; }
+.note { font-size: 11px; color: #999; margin-top: 10px; text-align: right; }
+
+/* ── two-col grid ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+
+/* ── table ── */
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: #1a3c5e; color: #fff; }
+thead th { padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; }
+tbody tr { border-bottom: 1px solid #eef0f5; }
+tbody tr:hover { background: #f4f7ff; }
+td { padding: 8px 12px; font-size: 12px; text-align: center; }
+td.left { text-align: left; }
+.bar-mini { display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle; margin-right: 4px; }
+
+/* ── divider ── */
+.divider { border: none; border-top: 1px solid #e2e6ef; margin: 8px 0 22px; }
+
+/* ── update hint ── */
+.hint { background: #f0f6ff; border: 1px solid #b8d4f0; border-radius: 8px;
+        padding: 12px 16px; font-size: 12px; color: #2a5a9e; margin-bottom: 24px; line-height: 1.7; }
+.hint strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     ▶ 데이터 업데이트 구역 — 매월 이 부분만 수정
+     ════════════════════════════════════════════ -->
+<script>
+// ────────────────────────────────────────────────────────────────
+//  📌 매월 데이터 추가 방법
+//  1. DATA.months 배열 끝에 "YYYY-MM" 추가
+//  2. DATA.대형CMS, 대형외, 소형.자사몰 등 각 배열 끝에 해당 월 값 추가
+//  3. 파일 저장 후 브라우저에서 다시 열면 자동 반영
+// ────────────────────────────────────────────────────────────────
+const DATA = {
+  months: ["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],
+
+  // 대형 (우체국 대형)
+  대형CMS:  [1295, 1241, 1518, 1666, 1304, 1528, 1594],
+  대형외:   [2205, 2313, 2259, 2620, 2145, 2298, 2274],
+
+  // 소형 채널별
+  소형: {
+    자사몰:  [8822, 9400,10249, 9008, 7375,16808, 9202],
+    네이버:  [1875, 2194, 2026, 1817, 1872, 1562, 1725],
+    카카오:  [1643, 1512, 1539, 1127, 1258, 1139,  960],
+    "29CM":  [ 356,  396,  236,  200,  149,  224,  126],
+    이베이:  [   0,    0,    0,    0,  954,  223,   77],
+    기타:    [   2,   42,   37,   56,   95,   37,   55],
+    // 기타 = 현대M포인트몰 + KBPAY + KREAM + 토스쇼핑 + 고향사랑기부제
+  }
+};
+
+// ── 자동 계산 (수정 불필요) ──────────────────────────────────────
+DATA.대형합계 = DATA.months.map((_,i) => DATA.대형CMS[i] + DATA.대형외[i]);
+DATA.소형합계 = DATA.months.map((_,i) =>
+  DATA.소형.자사몰[i] + DATA.소형.네이버[i] + DATA.소형.카카오[i] +
+  DATA.소형["29CM"][i] + DATA.소형.이베이[i] + DATA.소형.기타[i]);
+DATA.합계 = DATA.months.map((_,i) => DATA.대형합계[i] + DATA.소형합계[i]);
+
+// 보고 기준월 = 최신 데이터 월
+const LATEST = DATA.months.length - 1;
+const PREV   = LATEST > 0 ? LATEST - 1 : null;
+
+function delta(cur, prev) {
+  if (prev == null) return null;
+  const d = cur - prev;
+  const pct = ((d / prev) * 100).toFixed(1);
+  return { d, pct, cls: d >= 0 ? 'up' : 'down', arrow: d >= 0 ? '▲' : '▼' };
+}
+
+function fmt(n) { return n.toLocaleString(); }
+</script>
+
+<!-- ════════════ HEADER ════════════ -->
+<div class="header">
+  <h1>📦 우체국 택배 접수현황 월별 보고</h1>
+  <div class="header-meta">
+    <span id="hdr-period"></span>
+    <span id="hdr-latest"></span>
+    <span id="hdr-generated"></span>
+  </div>
+</div>
+
+<!-- ════════════ NAV ════════════ -->
+<div class="month-nav">
+  <label>📅 기준월</label>
+  <select id="month-sel" onchange="setMonth(this.value)"></select>
+</div>
+
+<div class="container">
+
+  <div class="hint">
+    💡 <strong>매월 업데이트 방법:</strong> 이 HTML 파일을 텍스트 편집기로 열어 상단 <code>DATA</code> 객체의 각 배열 끝에 해당 월 수치를 추가하세요.
+    저장 후 브라우저에서 다시 열면 모든 차트가 자동 갱신됩니다.
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">월 전체 접수</div>
+      <div class="kpi-val" id="kpi-total">—<span>건</span></div>
+      <div class="kpi-delta" id="kpi-total-d"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">대형 접수 (CMS + 지점·대량·기타)</div>
+      <div class="kpi-val" id="kpi-large">—<span>건</span></div>
+      <div class="kpi-delta" id="kpi-large-d"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">소형 접수 (자사몰 + 외부채널)</div>
+      <div class="kpi-val" id="kpi-small">—<span>건</span></div>
+      <div class="kpi-delta" id="kpi-small-d"></div>
+    </div>
+  </div>
+
+  <!-- ── 월별 합계 추이 ── -->
+  <div class="card">
+    <div class="section-title">월별 전체 접수건수 추이</div>
+    <div class="chart-wrap" style="height:220px">
+      <canvas id="c-trend"></canvas>
+    </div>
+    <p class="note">※ 현재 기준월 강조 표시</p>
+  </div>
+
+  <!-- ── 대형/소형 stacked + 채널 비중 ── -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-title">대형 / 소형 구성 추이</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="c-stack"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title" id="pie-title">당월 소형 채널 비중</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="c-pie"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 소형 채널별 이번달 bar ── -->
+  <div class="card">
+    <div class="section-title" id="ch-bar-title">당월 소형 채널별 접수건수</div>
+    <div class="chart-wrap" style="height:180px">
+      <canvas id="c-chbar"></canvas>
+    </div>
+  </div>
+
+  <!-- ── 소형 채널별 월별 추이 (multi-line) ── -->
+  <div class="card">
+    <div class="section-title">소형 채널별 월별 추이</div>
+    <div class="chart-wrap" style="height:260px">
+      <canvas id="c-multiline"></canvas>
+    </div>
+  </div>
+
+  <!-- ── 월별 상세 테이블 ── -->
+  <div class="card">
+    <div class="section-title">월별 상세 현황표</div>
+    <table>
+      <thead>
+        <tr>
+          <th>월</th>
+          <th>대형CMS</th><th>대형외</th><th>대형계</th>
+          <th>자사몰</th><th>네이버</th><th>카카오</th>
+          <th>29CM</th><th>이베이</th><th>기타</th>
+          <th>소형계</th><th style="background:#0d2a45">합계</th>
+        </tr>
+      </thead>
+      <tbody id="detail-tbody"></tbody>
+      <tfoot id="detail-tfoot"></tfoot>
+    </table>
+    <p class="note">※ 기타 = 현대M포인트몰 + KBPAY + KREAM + 토스쇼핑 + 고향사랑기부제</p>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT — 차트 렌더링
+     ════════════════════════════════════════════ -->
+<script>
+// ── 팔레트 (validated: CVD △E≥8, contrast pass) ──
+const PAL = {
+  자사몰:  '#2a78d6',
+  네이버:  '#eb6834',
+  카카오:  '#1baf7a',
+  '29CM':  '#eda100',
+  이베이:  '#e87ba4',
+  기타:    '#008300',
+};
+const PAL_ARR = Object.values(PAL);
+
+// single-series sequential: slot 1
+const C_BLUE   = '#2a78d6';
+const C_ORANGE = '#eb6834';
+const C_SURF   = '#f0f2f7'; // chart bg
+
+// ── 보고월 상태 ──
+let curIdx = LATEST;
+
+// ── 월 선택기 초기화 ──
+const sel = document.getElementById('month-sel');
+DATA.months.forEach((m, i) => {
+  const opt = document.createElement('option');
+  opt.value = i; opt.textContent = m + ' (기준)';
+  if (i === LATEST) opt.selected = true;
+  sel.appendChild(opt);
+});
+
+// ── 헤더 정보 ──
+document.getElementById('hdr-period').textContent =
+  '📊 집계기간: ' + DATA.months[0] + ' ~ ' + DATA.months[LATEST];
+document.getElementById('hdr-latest').textContent =
+  '최신: ' + DATA.months[LATEST];
+document.getElementById('hdr-generated').textContent =
+  '생성: ' + new Date().toLocaleDateString('ko-KR');
+
+// ─────────────────────────────────────────────
+//  KPI 업데이트
+// ─────────────────────────────────────────────
+function updateKPI(idx) {
+  const prev = idx > 0 ? idx - 1 : null;
+  const setKPI = (elId, dElId, cur, prv) => {
+    document.getElementById(elId).innerHTML = fmt(cur) + '<span>건</span>';
+    const d = delta(cur, prv);
+    const el = document.getElementById(dElId);
+    if (!d) { el.innerHTML = '<span class="neutral">전월 데이터 없음</span>'; return; }
+    el.innerHTML = `<span class="${d.cls}">${d.arrow} ${fmt(Math.abs(d.d))}건 (${d.pct}%) vs 전월</span>`;
+  };
+  setKPI('kpi-total', 'kpi-total-d', DATA.합계[idx], prev != null ? DATA.합계[prev] : null);
+  setKPI('kpi-large', 'kpi-large-d', DATA.대형합계[idx], prev != null ? DATA.대형합계[prev] : null);
+  setKPI('kpi-small', 'kpi-small-d', DATA.소형합계[idx], prev != null ? DATA.소형합계[prev] : null);
+}
+
+// ─────────────────────────────────────────────
+//  Chart.js 공통 defaults
+// ─────────────────────────────────────────────
+Chart.defaults.font.family = "'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#555';
+
+const gridOpts = {
+  color: 'rgba(0,0,0,0.05)',
+  drawTicks: false,
+};
+
+// ─────────────────────────────────────────────
+//  1. 월별 합계 추이 — Line (single series)
+// ─────────────────────────────────────────────
+let chartTrend;
+function buildTrend(idx) {
+  const bgColors = DATA.months.map((_, i) =>
+    i === idx ? C_BLUE : 'rgba(42,120,214,0.25)');
+  const borderColors = DATA.months.map((_, i) =>
+    i === idx ? C_BLUE : 'rgba(42,120,214,0.5)');
+
+  if (chartTrend) { chartTrend.destroy(); }
+  chartTrend = new Chart(document.getElementById('c-trend'), {
+    type: 'line',
+    data: {
+      labels: DATA.months,
+      datasets: [{
+        data: DATA.합계,
+        borderColor: C_BLUE,
+        backgroundColor: 'rgba(42,120,214,0.08)',
+        borderWidth: 2,
+        pointRadius: DATA.months.map((_, i) => i === idx ? 7 : 4),
+        pointBackgroundColor: bgColors,
+        pointBorderColor: borderColors,
+        pointBorderWidth: 2,
+        tension: 0.3,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          mode: 'index', intersect: false,
+          callbacks: {
+            label: ctx => ` 합계 ${fmt(ctx.parsed.y)}건`,
+            afterBody: (items) => {
+              const i = items[0].dataIndex;
+              return [
+                ` 대형 ${fmt(DATA.대형합계[i])}건`,
+                ` 소형 ${fmt(DATA.소형합계[i])}건`,
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: gridOpts, ticks: { maxRotation: 0 } },
+        y: {
+          grid: gridOpts,
+          ticks: { callback: v => fmt(v) }
+        }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+//  2. 대형/소형 stacked bar
+// ─────────────────────────────────────────────
+let chartStack;
+function buildStack(idx) {
+  const borderW = DATA.months.map((_, i) => i === idx ? 2.5 : 0);
+  const borderC = DATA.months.map((_, i) => i === idx ? '#1a3c5e' : 'transparent');
+  if (chartStack) chartStack.destroy();
+  chartStack = new Chart(document.getElementById('c-stack'), {
+    type: 'bar',
+    data: {
+      labels: DATA.months,
+      datasets: [
+        {
+          label: '소형',
+          data: DATA.소형합계,
+          backgroundColor: 'rgba(42,120,214,0.75)',
+          borderWidth: borderW, borderColor: borderC,
+          borderRadius: { topLeft: 4, topRight: 4 },
+          borderSkipped: 'bottom',
+        },
+        {
+          label: '대형',
+          data: DATA.대형합계,
+          backgroundColor: 'rgba(235,104,52,0.75)',
+          borderWidth: 0,
+          borderRadius: { topLeft: 0, topRight: 0 },
+          borderSkipped: 'top',
+        },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 12, padding: 12 } },
+        tooltip: {
+          mode: 'index', intersect: false,
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건` }
+        }
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 0 } },
+        y: { stacked: true, grid: gridOpts, ticks: { callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+//  3. 소형 채널 비중 (Doughnut) — 기준월
+// ─────────────────────────────────────────────
+let chartPie;
+function buildPie(idx) {
+  document.getElementById('pie-title').textContent =
+    DATA.months[idx] + ' 소형 채널 비중';
+  const labels = Object.keys(PAL);
+  const vals = labels.map(k => DATA.소형[k][idx]);
+  const total = vals.reduce((a, b) => a + b, 0);
+  if (chartPie) chartPie.destroy();
+  chartPie = new Chart(document.getElementById('c-pie'), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        backgroundColor: PAL_ARR,
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverBorderWidth: 3,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '58%',
+      plugins: {
+        legend: { position: 'right', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const pct = ((ctx.parsed / total) * 100).toFixed(1);
+              return ` ${ctx.label}: ${fmt(ctx.parsed)}건 (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+//  4. 소형 채널별 당월 horizontal bar
+// ─────────────────────────────────────────────
+let chartChbar;
+function buildChbar(idx) {
+  document.getElementById('ch-bar-title').textContent =
+    DATA.months[idx] + ' 소형 채널별 접수건수';
+  const labels = Object.keys(PAL);
+  const vals = labels.map(k => DATA.소형[k][idx]);
+  if (chartChbar) chartChbar.destroy();
+  chartChbar = new Chart(document.getElementById('c-chbar'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        backgroundColor: PAL_ARR,
+        borderRadius: 4,
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ` ${fmt(ctx.parsed.x)}건` }
+        },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: {
+          grid: gridOpts,
+          ticks: { callback: v => fmt(v) }
+        },
+        y: { grid: { display: false } }
+      },
+      // 직접 레이블 (저대비 색상 relief)
+      animation: { onComplete: (e) => drawBarLabels(e, 'c-chbar') }
+    }
+  });
+}
+
+// 직접 레이블 그리기 (저대비 채널용 relief)
+function drawBarLabels(e, canvasId) {
+  const chart = e.chart;
+  const ctx2 = chart.ctx;
+  ctx2.save();
+  chart.data.datasets[0].data.forEach((val, i) => {
+    const meta = chart.getDatasetMeta(0);
+    const bar = meta.data[i];
+    if (!bar) return;
+    ctx2.font = 'bold 11px Apple SD Gothic Neo';
+    ctx2.fillStyle = '#333';
+    ctx2.textAlign = 'left';
+    ctx2.textBaseline = 'middle';
+    const x = bar.x + 6;
+    const y = bar.y;
+    ctx2.fillText(fmt(val) + '건', x, y);
+  });
+  ctx2.restore();
+}
+
+// ─────────────────────────────────────────────
+//  5. 소형 채널별 월별 multi-line
+// ─────────────────────────────────────────────
+let chartMulti;
+function buildMulti() {
+  const channels = Object.keys(PAL);
+  if (chartMulti) chartMulti.destroy();
+  chartMulti = new Chart(document.getElementById('c-multiline'), {
+    type: 'line',
+    data: {
+      labels: DATA.months,
+      datasets: channels.map((ch, ci) => ({
+        label: ch,
+        data: DATA.소형[ch],
+        borderColor: PAL_ARR[ci],
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: PAL_ARR[ci],
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
+        tension: 0.25,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { boxWidth: 12, padding: 14, font: { size: 11 } }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`
+          }
+        }
+      },
+      scales: {
+        x: { grid: gridOpts, ticks: { maxRotation: 0 } },
+        y: { grid: gridOpts, ticks: { callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+//  6. 상세 테이블
+// ─────────────────────────────────────────────
+function buildTable(idx) {
+  const tbody = document.getElementById('detail-tbody');
+  tbody.innerHTML = '';
+  DATA.months.forEach((m, i) => {
+    const isCur = i === idx;
+    const style = isCur ? 'background:#eef5ff;font-weight:700;' : '';
+    tbody.innerHTML += `<tr style="${style}">
+      <td class="left">${m}${isCur ? ' ◀' : ''}</td>
+      <td>${fmt(DATA.대형CMS[i])}</td>
+      <td>${fmt(DATA.대형외[i])}</td>
+      <td><strong>${fmt(DATA.대형합계[i])}</strong></td>
+      <td>${fmt(DATA.소형.자사몰[i])}</td>
+      <td>${fmt(DATA.소형.네이버[i])}</td>
+      <td>${fmt(DATA.소형.카카오[i])}</td>
+      <td>${fmt(DATA.소형["29CM"][i])}</td>
+      <td>${fmt(DATA.소형.이베이[i])}</td>
+      <td>${fmt(DATA.소형.기타[i])}</td>
+      <td><strong>${fmt(DATA.소형합계[i])}</strong></td>
+      <td style="background:#f0f5ff"><strong>${fmt(DATA.합계[i])}</strong></td>
+    </tr>`;
+  });
+
+  // 합계행
+  const sum = (arr) => arr.reduce((a, b) => a + b, 0);
+  const tfoot = document.getElementById('detail-tfoot');
+  tfoot.innerHTML = `<tr style="background:#1a3c5e;color:#fff;font-weight:700;">
+    <td class="left">합계</td>
+    <td>${fmt(sum(DATA.대형CMS))}</td>
+    <td>${fmt(sum(DATA.대형외))}</td>
+    <td>${fmt(sum(DATA.대형합계))}</td>
+    <td>${fmt(sum(DATA.소형.자사몰))}</td>
+    <td>${fmt(sum(DATA.소형.네이버))}</td>
+    <td>${fmt(sum(DATA.소형.카카오))}</td>
+    <td>${fmt(sum(DATA.소형["29CM"]))}</td>
+    <td>${fmt(sum(DATA.소형.이베이))}</td>
+    <td>${fmt(sum(DATA.소형.기타))}</td>
+    <td>${fmt(sum(DATA.소형합계))}</td>
+    <td style="background:#0d2a45">${fmt(sum(DATA.합계))}</td>
+  </tr>`;
+}
+
+// ─────────────────────────────────────────────
+//  setMonth — 기준월 변경 시 전체 갱신
+// ─────────────────────────────────────────────
+function setMonth(val) {
+  curIdx = parseInt(val);
+  updateKPI(curIdx);
+  buildTrend(curIdx);
+  buildStack(curIdx);
+  buildPie(curIdx);
+  buildChbar(curIdx);
+  buildTable(curIdx);
+  // multiline은 기준월 무관 (전체 표시)
+}
+
+// ── 초기 렌더링 ──
+(function init() {
+  updateKPI(LATEST);
+  buildTrend(LATEST);
+  buildStack(LATEST);
+  buildPie(LATEST);
+  buildChbar(LATEST);
+  buildMulti();
+  buildTable(LATEST);
+})();
+</script>
+</body>
+</html>
