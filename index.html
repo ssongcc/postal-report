@@ -6,32 +6,38 @@
 <title>우체국 택배 월별 현황 보고</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-/* ── reset & base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
        background: #f0f2f7; color: #1a2332; font-size: 14px; }
 
-/* ── header ── */
 .header { background: linear-gradient(135deg, #1a3c5e 0%, #2a78d6 100%);
           color: #fff; padding: 28px 40px 24px; }
 .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
 .header-meta { font-size: 12px; opacity: 0.75; display: flex; gap: 20px; flex-wrap: wrap; }
-.header-meta span { display: flex; align-items: center; gap: 4px; }
 
-/* ── month nav ── */
 .month-nav { background: #fff; border-bottom: 1px solid #e2e6ef;
              padding: 10px 40px; display: flex; align-items: center; gap: 8px; }
 .month-nav label { font-size: 12px; color: #555; font-weight: 600; }
 .month-nav select { border: 1px solid #c8d0de; border-radius: 6px; padding: 5px 10px;
                     font-size: 13px; color: #1a2332; background: #fff; cursor: pointer; }
 
-/* ── layout ── */
+/* 탭 */
+.tab-bar { background: #fff; border-bottom: 2px solid #e2e6ef;
+           padding: 0 40px; display: flex; gap: 0; }
+.tab { padding: 12px 22px; font-size: 13px; font-weight: 600; color: #888;
+       cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
+       transition: all 0.15s; }
+.tab:hover { color: #2a78d6; }
+.tab.active { color: #2a78d6; border-bottom-color: #2a78d6; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
 .container { max-width: 1160px; margin: 0 auto; padding: 28px 24px; }
 .section-title { font-size: 13px; font-weight: 700; color: #1a3c5e;
                  margin-bottom: 14px; padding-left: 10px;
                  border-left: 4px solid #2a78d6; }
 
-/* ── KPI tiles ── */
 .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
 .kpi { background: #fff; border-radius: 12px; padding: 18px 22px;
        box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
@@ -43,16 +49,12 @@ body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans
 .down { color: #eb6834; }
 .neutral { color: #888; }
 
-/* ── cards ── */
 .card { background: #fff; border-radius: 12px; padding: 22px 24px;
         box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 22px; }
 .chart-wrap { position: relative; }
 .note { font-size: 11px; color: #999; margin-top: 10px; text-align: right; }
-
-/* ── two-col grid ── */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
 
-/* ── table ── */
 table { width: 100%; border-collapse: collapse; }
 thead tr { background: #1a3c5e; color: #fff; }
 thead th { padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; }
@@ -60,67 +62,73 @@ tbody tr { border-bottom: 1px solid #eef0f5; }
 tbody tr:hover { background: #f4f7ff; }
 td { padding: 8px 12px; font-size: 12px; text-align: center; }
 td.left { text-align: left; }
-.bar-mini { display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle; margin-right: 4px; }
 
-/* ── divider ── */
-.divider { border: none; border-top: 1px solid #e2e6ef; margin: 8px 0 22px; }
+.alert-row { background: #fff4f0; }
+.alert-row td { color: #c0392b; font-weight: 700; }
 
-/* ── update hint ── */
 .hint { background: #f0f6ff; border: 1px solid #b8d4f0; border-radius: 8px;
         padding: 12px 16px; font-size: 12px; color: #2a5a9e; margin-bottom: 24px; line-height: 1.7; }
 .hint strong { font-weight: 700; }
+
+.day-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.day-kpi { background: #fff; border-radius: 10px; padding: 14px 18px;
+           box-shadow: 0 1px 5px rgba(0,0,0,0.06); }
+.day-kpi-label { font-size: 11px; color: #666; font-weight: 600; margin-bottom: 3px; }
+.day-kpi-val { font-size: 22px; font-weight: 800; color: #1a3c5e; }
+.day-kpi-val span { font-size: 12px; font-weight: 400; color: #888; margin-left: 2px; }
+.day-kpi-sub { font-size: 11px; color: #999; margin-top: 3px; }
 </style>
 </head>
 <body>
 
 <!-- ════════════════════════════════════════════
-     ▶ 데이터 업데이트 구역 — 매월 이 부분만 수정
+     ▶ 데이터 업데이트 구역
      ════════════════════════════════════════════ -->
 <script>
-// ────────────────────────────────────────────────────────────────
-//  📌 매월 데이터 추가 방법
-//  1. DATA.months 배열 끝에 "YYYY-MM" 추가
-//  2. DATA.대형CMS, 대형외, 소형.자사몰 등 각 배열 끝에 해당 월 값 추가
-//  3. 파일 저장 후 브라우저에서 다시 열면 자동 반영
-// ────────────────────────────────────────────────────────────────
-const DATA = {
+// ────────────────────────────────────────────────────────────
+//  📌 매월 업데이트 방법
+//  1. MONTHLY.months 배열 끝에 "YYYY-MM" 추가
+//  2. 각 배열 끝에 해당 월 집계값 추가
+//  3. DAILY 객체에 "YYYY-MM": [...] 일별 배열 추가
+//     각 항목: {d:"날짜", cms:n, 외:n, 자:n, 네:n, 카:n, "29":n, 이:n, 기:n, 합:n}
+// ────────────────────────────────────────────────────────────
+
+// ── 월별 집계 ──
+const MONTHLY = {
   months: ["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"],
-
-  // 대형 (우체국 대형)
-  대형CMS:  [1295, 1241, 1518, 1666, 1304, 1528, 1594],
-  대형외:   [2205, 2313, 2259, 2620, 2145, 2298, 2274],
-
-  // 소형 채널별
+  대형CMS: [1295,1241,1518,1666,1304,1528,1594],
+  대형외:  [2205,2313,2259,2620,2145,2298,2274],
   소형: {
-    자사몰:  [8822, 9400,10249, 9008, 7375,16808, 9202],
-    네이버:  [1875, 2194, 2026, 1817, 1872, 1562, 1725],
-    카카오:  [1643, 1512, 1539, 1127, 1258, 1139,  960],
-    "29CM":  [ 356,  396,  236,  200,  149,  224,  126],
-    이베이:  [   0,    0,    0,    0,  954,  223,   77],
-    기타:    [   2,   42,   37,   56,   95,   37,   55],
-    // 기타 = 현대M포인트몰 + KBPAY + KREAM + 토스쇼핑 + 고향사랑기부제
+    자사몰: [8822,9400,10249,9008,7375,16808,9202],
+    네이버: [1875,2194,2026,1817,1872,1562,1725],
+    카카오: [1643,1512,1539,1127,1258,1139,960],
+    "29CM": [356,396,236,200,149,224,126],
+    이베이: [0,0,0,0,954,223,77],
+    기타:   [2,42,37,56,95,37,55],
   }
 };
 
-// ── 자동 계산 (수정 불필요) ──────────────────────────────────────
-DATA.대형합계 = DATA.months.map((_,i) => DATA.대형CMS[i] + DATA.대형외[i]);
-DATA.소형합계 = DATA.months.map((_,i) =>
-  DATA.소형.자사몰[i] + DATA.소형.네이버[i] + DATA.소형.카카오[i] +
-  DATA.소형["29CM"][i] + DATA.소형.이베이[i] + DATA.소형.기타[i]);
-DATA.합계 = DATA.months.map((_,i) => DATA.대형합계[i] + DATA.소형합계[i]);
+// ── 일별 데이터 ──
+const DAILY = {
+"2026-01":[{"d":"2026-01-02","cms":40,"외":62,"자":1588,"네":53,"카":131,"29":1,"이":0,"기":0,"합":1875},{"d":"2026-01-05","cms":107,"외":134,"자":718,"네":249,"카":187,"29":68,"이":0,"기":0,"합":1463},{"d":"2026-01-06","cms":58,"외":79,"자":272,"네":77,"카":88,"29":17,"이":0,"기":0,"합":591},{"d":"2026-01-07","cms":41,"외":101,"자":198,"네":84,"카":74,"29":15,"이":0,"기":0,"합":513},{"d":"2026-01-08","cms":61,"외":55,"자":220,"네":80,"카":83,"29":8,"이":0,"기":0,"합":507},{"d":"2026-01-09","cms":41,"외":71,"자":235,"네":59,"카":62,"29":8,"이":0,"기":0,"합":476},{"d":"2026-01-12","cms":52,"외":160,"자":531,"네":151,"카":226,"29":36,"이":0,"기":0,"합":1156},{"d":"2026-01-13","cms":74,"외":94,"자":248,"네":88,"카":78,"29":15,"이":0,"기":0,"합":597},{"d":"2026-01-14","cms":62,"외":97,"자":240,"네":74,"카":55,"29":16,"이":0,"기":0,"합":544},{"d":"2026-01-15","cms":41,"외":101,"자":240,"네":64,"카":48,"29":17,"이":0,"기":0,"합":511},{"d":"2026-01-16","cms":69,"외":213,"자":214,"네":67,"카":49,"29":10,"이":0,"기":0,"합":622},{"d":"2026-01-19","cms":108,"외":136,"자":638,"네":130,"카":145,"29":30,"이":0,"기":0,"합":1187},{"d":"2026-01-20","cms":56,"외":156,"자":364,"네":65,"카":33,"29":11,"이":0,"기":0,"합":685},{"d":"2026-01-21","cms":61,"외":124,"자":301,"네":68,"카":47,"29":8,"이":0,"기":0,"합":609},{"d":"2026-01-22","cms":68,"외":77,"자":263,"네":64,"카":50,"29":18,"이":0,"기":0,"합":540},{"d":"2026-01-23","cms":48,"외":103,"자":298,"네":72,"카":29,"29":11,"이":0,"기":0,"합":561},{"d":"2026-01-26","cms":57,"외":106,"자":889,"네":113,"카":104,"29":26,"이":0,"기":0,"합":1295},{"d":"2026-01-27","cms":73,"외":105,"자":469,"네":89,"카":42,"29":9,"이":0,"기":1,"합":788},{"d":"2026-01-28","cms":45,"외":84,"자":331,"네":75,"카":44,"29":13,"이":0,"기":0,"합":592},{"d":"2026-01-29","cms":95,"외":77,"자":276,"네":82,"카":30,"29":8,"이":0,"기":1,"합":569},{"d":"2026-01-30","cms":38,"외":70,"자":289,"네":71,"카":38,"29":11,"이":0,"기":0,"합":517}],
+"2026-02":[{"d":"2026-02-02","cms":59,"외":100,"자":911,"네":207,"카":105,"29":21,"이":0,"기":8,"합":1411},{"d":"2026-02-03","cms":84,"외":117,"자":616,"네":98,"카":41,"29":19,"이":0,"기":3,"합":978},{"d":"2026-02-04","cms":64,"외":148,"자":329,"네":101,"카":43,"29":23,"이":0,"기":1,"합":709},{"d":"2026-02-05","cms":45,"외":101,"자":404,"네":83,"카":32,"29":28,"이":0,"기":0,"합":693},{"d":"2026-02-06","cms":60,"외":94,"자":296,"네":101,"카":40,"29":24,"이":0,"기":0,"합":615},{"d":"2026-02-09","cms":122,"외":210,"자":956,"네":311,"카":129,"29":66,"이":0,"기":4,"합":1798},{"d":"2026-02-10","cms":141,"외":343,"자":777,"네":203,"카":75,"29":18,"이":0,"기":5,"합":1562},{"d":"2026-02-11","cms":96,"외":295,"자":578,"네":169,"카":60,"29":32,"이":0,"기":5,"합":1235},{"d":"2026-02-12","cms":92,"외":90,"자":535,"네":146,"카":72,"29":31,"이":0,"기":0,"합":966},{"d":"2026-02-19","cms":67,"외":72,"자":958,"네":258,"카":487,"29":82,"이":0,"기":0,"합":1924},{"d":"2026-02-20","cms":76,"외":117,"자":962,"네":61,"카":58,"29":6,"이":0,"기":8,"합":1288},{"d":"2026-02-23","cms":64,"외":92,"자":786,"네":172,"카":172,"29":24,"이":0,"기":3,"합":1313},{"d":"2026-02-24","cms":83,"외":205,"자":353,"네":91,"카":54,"29":6,"이":0,"기":2,"합":794},{"d":"2026-02-25","cms":44,"외":135,"자":323,"네":73,"카":39,"29":5,"이":0,"기":2,"합":621},{"d":"2026-02-26","cms":69,"외":77,"자":330,"네":64,"카":63,"29":6,"이":0,"기":0,"합":609},{"d":"2026-02-27","cms":75,"외":117,"자":286,"네":56,"카":42,"29":5,"이":0,"기":1,"합":582}],
+"2026-03":[{"d":"2026-03-03","cms":103,"외":139,"자":1034,"네":210,"카":189,"29":28,"이":0,"기":1,"합":1704},{"d":"2026-03-04","cms":66,"외":182,"자":953,"네":70,"카":55,"29":7,"이":0,"기":1,"합":1334},{"d":"2026-03-05","cms":84,"외":48,"자":351,"네":75,"카":40,"29":6,"이":0,"기":2,"합":606},{"d":"2026-03-06","cms":65,"외":67,"자":279,"네":81,"카":46,"29":6,"이":0,"기":2,"합":546},{"d":"2026-03-09","cms":81,"외":130,"자":872,"네":168,"카":127,"29":15,"이":0,"기":0,"합":1393},{"d":"2026-03-10","cms":85,"외":90,"자":368,"네":77,"카":64,"29":9,"이":0,"기":0,"합":693},{"d":"2026-03-11","cms":61,"외":114,"자":359,"네":73,"카":58,"29":13,"이":0,"기":0,"합":678},{"d":"2026-03-12","cms":57,"외":116,"자":377,"네":79,"카":60,"29":12,"이":0,"기":0,"합":701},{"d":"2026-03-13","cms":51,"외":72,"자":347,"네":51,"카":48,"29":9,"이":0,"기":1,"합":579},{"d":"2026-03-16","cms":72,"외":96,"자":896,"네":174,"카":185,"29":29,"이":0,"기":8,"합":1460},{"d":"2026-03-17","cms":99,"외":119,"자":490,"네":63,"카":53,"29":12,"이":0,"기":0,"합":836},{"d":"2026-03-18","cms":78,"외":103,"자":360,"네":79,"카":39,"29":10,"이":0,"기":2,"합":671},{"d":"2026-03-19","cms":58,"외":69,"자":347,"네":71,"카":56,"29":9,"이":0,"기":3,"합":613},{"d":"2026-03-20","cms":59,"외":73,"자":283,"네":69,"카":52,"29":7,"이":0,"기":0,"합":543},{"d":"2026-03-23","cms":82,"외":132,"자":799,"네":154,"카":142,"29":31,"이":0,"기":4,"합":1344},{"d":"2026-03-24","cms":86,"외":119,"자":346,"네":79,"카":33,"29":3,"이":0,"기":0,"합":666},{"d":"2026-03-25","cms":64,"외":95,"자":278,"네":78,"카":47,"29":5,"이":0,"기":2,"합":569},{"d":"2026-03-26","cms":53,"외":65,"자":315,"네":67,"카":37,"29":4,"이":0,"기":0,"합":541},{"d":"2026-03-27","cms":57,"외":107,"자":257,"네":54,"카":34,"29":3,"이":0,"기":5,"합":517},{"d":"2026-03-30","cms":87,"외":132,"자":658,"네":168,"카":109,"29":12,"이":0,"기":2,"합":1168},{"d":"2026-03-31","cms":70,"외":191,"자":280,"네":86,"카":65,"29":6,"이":0,"기":4,"합":702}],
+"2026-04":[{"d":"2026-04-01","cms":54,"외":124,"자":247,"네":52,"카":43,"29":5,"이":0,"기":2,"합":527},{"d":"2026-04-02","cms":87,"외":119,"자":677,"네":71,"카":49,"29":6,"이":0,"기":2,"합":1011},{"d":"2026-04-03","cms":64,"외":83,"자":389,"네":83,"카":45,"29":5,"이":0,"기":6,"합":675},{"d":"2026-04-06","cms":74,"외":168,"자":727,"네":178,"카":100,"29":17,"이":0,"기":5,"합":1269},{"d":"2026-04-07","cms":96,"외":139,"자":333,"네":103,"카":40,"29":8,"이":0,"기":2,"합":721},{"d":"2026-04-08","cms":49,"외":134,"자":348,"네":72,"카":43,"29":6,"이":0,"기":0,"합":652},{"d":"2026-04-09","cms":56,"외":70,"자":309,"네":73,"카":48,"29":6,"이":0,"기":1,"합":563},{"d":"2026-04-10","cms":51,"외":86,"자":339,"네":72,"카":40,"29":6,"이":0,"기":0,"합":594},{"d":"2026-04-13","cms":85,"외":153,"자":880,"네":141,"카":120,"29":14,"이":0,"기":2,"합":1395},{"d":"2026-04-14","cms":102,"외":114,"자":373,"네":88,"카":43,"29":8,"이":0,"기":2,"합":730},{"d":"2026-04-15","cms":72,"외":133,"자":338,"네":70,"카":29,"29":6,"이":0,"기":1,"합":649},{"d":"2026-04-16","cms":59,"외":66,"자":299,"네":66,"카":30,"29":43,"이":0,"기":1,"합":564},{"d":"2026-04-17","cms":51,"외":85,"자":292,"네":58,"카":38,"29":4,"이":0,"기":1,"합":529},{"d":"2026-04-20","cms":60,"외":122,"자":705,"네":129,"카":89,"29":15,"이":0,"기":5,"합":1125},{"d":"2026-04-21","cms":99,"외":99,"자":461,"네":57,"카":53,"29":5,"이":0,"기":1,"합":775},{"d":"2026-04-22","cms":80,"외":171,"자":272,"네":68,"카":57,"29":4,"이":0,"기":3,"합":655},{"d":"2026-04-23","cms":50,"외":112,"자":267,"네":62,"카":48,"29":5,"이":0,"기":2,"합":546},{"d":"2026-04-24","cms":63,"외":104,"자":242,"네":60,"카":30,"29":4,"이":0,"기":1,"합":504},{"d":"2026-04-27","cms":99,"외":149,"자":571,"네":135,"카":98,"29":15,"이":0,"기":6,"합":1073},{"d":"2026-04-28","cms":139,"외":136,"자":365,"네":61,"카":31,"29":6,"이":0,"기":3,"합":741},{"d":"2026-04-29","cms":94,"외":181,"자":303,"네":71,"카":29,"29":7,"이":0,"기":4,"합":689},{"d":"2026-04-30","cms":82,"외":72,"자":271,"네":47,"카":24,"29":5,"이":0,"기":6,"합":507}],
+"2026-05":[{"d":"2026-05-04","cms":65,"외":90,"자":967,"네":186,"카":87,"29":14,"이":0,"기":14,"합":1423},{"d":"2026-05-06","cms":81,"외":207,"자":601,"네":125,"카":75,"29":8,"이":0,"기":16,"합":1113},{"d":"2026-05-07","cms":81,"외":117,"자":417,"네":81,"카":32,"29":11,"이":0,"기":7,"합":746},{"d":"2026-05-08","cms":57,"외":66,"자":313,"네":71,"카":37,"29":6,"이":1,"기":5,"합":556},{"d":"2026-05-11","cms":76,"외":171,"자":740,"네":162,"카":125,"29":20,"이":607,"기":12,"합":1913},{"d":"2026-05-12","cms":96,"외":102,"자":357,"네":113,"카":64,"29":6,"이":34,"기":6,"합":778},{"d":"2026-05-13","cms":53,"외":113,"자":315,"네":86,"카":66,"29":9,"이":36,"기":6,"합":684},{"d":"2026-05-14","cms":65,"외":81,"자":314,"네":63,"카":60,"29":5,"이":33,"기":4,"합":625},{"d":"2026-05-15","cms":48,"외":99,"자":236,"네":47,"카":60,"29":9,"이":27,"기":2,"합":528},{"d":"2026-05-18","cms":89,"외":158,"자":607,"네":135,"카":284,"29":17,"이":92,"기":7,"합":1389},{"d":"2026-05-19","cms":73,"외":115,"자":277,"네":65,"카":45,"29":8,"이":48,"기":3,"합":634},{"d":"2026-05-20","cms":73,"외":128,"자":271,"네":61,"카":56,"29":3,"이":38,"기":4,"합":634},{"d":"2026-05-21","cms":70,"외":109,"자":287,"네":61,"카":39,"29":9,"이":7,"기":1,"합":583},{"d":"2026-05-22","cms":92,"외":107,"자":250,"네":45,"카":40,"29":3,"이":5,"기":1,"합":543},{"d":"2026-05-26","cms":104,"외":180,"자":692,"네":413,"카":94,"29":13,"이":4,"기":3,"합":1503},{"d":"2026-05-27","cms":62,"외":94,"자":264,"네":50,"카":31,"29":1,"이":4,"기":2,"합":508},{"d":"2026-05-28","cms":72,"외":116,"자":231,"네":59,"카":29,"29":3,"이":9,"기":0,"합":519},{"d":"2026-05-29","cms":47,"외":92,"자":236,"네":49,"카":34,"29":4,"이":9,"기":2,"합":473}],
+"2026-06":[{"d":"2026-06-01","cms":70,"외":126,"자":664,"네":138,"카":95,"29":3,"이":30,"기":2,"합":1128},{"d":"2026-06-02","cms":111,"외":114,"자":1186,"네":65,"카":40,"29":5,"이":11,"기":2,"합":1534},{"d":"2026-06-04","cms":88,"외":171,"자":1173,"네":95,"카":69,"29":9,"이":30,"기":1,"합":1636},{"d":"2026-06-05","cms":74,"외":61,"자":536,"네":59,"카":22,"29":18,"이":10,"기":1,"합":781},{"d":"2026-06-08","cms":61,"외":127,"자":1437,"네":127,"카":85,"29":37,"이":4,"기":3,"합":1881},{"d":"2026-06-09","cms":84,"외":94,"자":490,"네":67,"카":35,"29":14,"이":12,"기":1,"합":797},{"d":"2026-06-10","cms":55,"외":116,"자":521,"네":47,"카":35,"29":8,"이":10,"기":0,"합":792},{"d":"2026-06-11","cms":87,"외":105,"자":475,"네":46,"카":38,"29":10,"이":12,"기":2,"합":775},{"d":"2026-06-12","cms":71,"외":122,"자":490,"네":44,"카":137,"29":6,"이":5,"기":0,"합":875},{"d":"2026-06-15","cms":63,"외":83,"자":1612,"네":109,"카":128,"29":23,"이":28,"기":4,"합":2050},{"d":"2026-06-16","cms":69,"외":87,"자":543,"네":70,"카":54,"29":17,"이":9,"기":1,"합":850},{"d":"2026-06-17","cms":75,"외":113,"자":423,"네":54,"카":40,"29":13,"이":9,"기":1,"합":728},{"d":"2026-06-18","cms":68,"외":70,"자":467,"네":49,"카":40,"29":9,"이":5,"기":1,"합":709},{"d":"2026-06-19","cms":59,"외":90,"자":426,"네":59,"카":30,"29":7,"이":7,"기":2,"합":680},{"d":"2026-06-22","cms":52,"외":107,"자":1674,"네":109,"카":79,"29":17,"이":11,"기":3,"합":2052},{"d":"2026-06-23","cms":87,"외":100,"자":507,"네":71,"카":30,"29":5,"이":4,"기":1,"합":805},{"d":"2026-06-24","cms":81,"외":103,"자":463,"네":69,"카":27,"29":5,"이":7,"기":2,"합":757},{"d":"2026-06-25","cms":73,"외":93,"자":499,"네":70,"카":25,"29":3,"이":7,"기":2,"합":772},{"d":"2026-06-26","cms":75,"외":128,"자":752,"네":44,"카":25,"29":4,"이":2,"기":3,"합":1033},{"d":"2026-06-29","cms":53,"외":138,"자":1343,"네":112,"카":65,"29":9,"이":4,"기":5,"합":1729},{"d":"2026-06-30","cms":72,"외":150,"자":1127,"네":58,"카":40,"29":2,"이":6,"기":0,"합":1455}],
+"2026-07":[{"d":"2026-07-01","cms":59,"외":99,"자":1479,"네":75,"카":47,"29":12,"이":12,"기":1,"합":1784},{"d":"2026-07-02","cms":71,"외":69,"자":543,"네":93,"카":31,"29":6,"이":5,"기":1,"합":819},{"d":"2026-07-03","cms":74,"외":98,"자":205,"네":54,"카":28,"29":5,"이":6,"기":1,"합":471},{"d":"2026-07-06","cms":64,"외":110,"자":443,"네":117,"카":102,"29":16,"이":9,"기":4,"합":865},{"d":"2026-07-07","cms":107,"외":114,"자":249,"네":71,"카":21,"29":3,"이":3,"기":1,"합":569},{"d":"2026-07-08","cms":59,"외":127,"자":237,"네":72,"카":56,"29":8,"이":7,"기":0,"합":566},{"d":"2026-07-09","cms":68,"외":58,"자":322,"네":59,"카":37,"29":7,"이":8,"기":2,"합":561},{"d":"2026-07-10","cms":42,"외":84,"자":226,"네":49,"카":22,"29":3,"이":6,"기":3,"합":435},{"d":"2026-07-13","cms":88,"외":104,"자":507,"네":127,"카":94,"29":9,"이":1,"기":1,"합":931},{"d":"2026-07-14","cms":79,"외":104,"자":277,"네":48,"카":33,"29":3,"이":4,"기":2,"합":550},{"d":"2026-07-15","cms":80,"외":150,"자":240,"네":57,"카":29,"29":1,"이":1,"기":2,"합":560},{"d":"2026-07-16","cms":75,"외":151,"자":219,"네":51,"카":33,"29":4,"이":5,"기":4,"합":542},{"d":"2026-07-20","cms":88,"외":87,"자":1068,"네":136,"카":111,"29":11,"이":4,"기":10,"합":1515},{"d":"2026-07-21","cms":97,"외":74,"자":288,"네":58,"카":23,"29":3,"이":2,"기":1,"합":546},{"d":"2026-07-22","cms":76,"외":107,"자":260,"네":258,"카":34,"29":3,"이":2,"기":1,"합":741},{"d":"2026-07-23","cms":64,"외":78,"자":293,"네":72,"카":35,"29":2,"이":2,"기":0,"합":546},{"d":"2026-07-24","cms":52,"외":81,"자":240,"네":42,"카":44,"29":4,"이":0,"기":3,"합":466},{"d":"2026-07-27","cms":67,"외":233,"자":1247,"네":78,"카":82,"29":9,"이":0,"기":5,"합":1721},{"d":"2026-07-28","cms":94,"외":80,"자":223,"네":59,"카":30,"29":9,"이":0,"기":4,"합":499},{"d":"2026-07-29","cms":62,"외":105,"자":195,"네":49,"카":19,"29":1,"이":0,"기":2,"합":433},{"d":"2026-07-30","cms":58,"외":72,"자":218,"네":51,"카":34,"29":4,"이":0,"기":5,"합":442},{"d":"2026-07-31","cms":70,"외":89,"자":223,"네":49,"카":15,"29":3,"이":0,"기":2,"합":451}]
+};
 
-// 보고 기준월 = 최신 데이터 월
-const LATEST = DATA.months.length - 1;
-const PREV   = LATEST > 0 ? LATEST - 1 : null;
+// ── 자동 계산 ──
+MONTHLY.대형합계 = MONTHLY.months.map((_,i) => MONTHLY.대형CMS[i] + MONTHLY.대형외[i]);
+MONTHLY.소형합계 = MONTHLY.months.map((_,i) =>
+  MONTHLY.소형.자사몰[i]+MONTHLY.소형.네이버[i]+MONTHLY.소형.카카오[i]+
+  MONTHLY.소형["29CM"][i]+MONTHLY.소형.이베이[i]+MONTHLY.소형.기타[i]);
+MONTHLY.합계 = MONTHLY.months.map((_,i) => MONTHLY.대형합계[i]+MONTHLY.소형합계[i]);
 
-function delta(cur, prev) {
-  if (prev == null) return null;
-  const d = cur - prev;
-  const pct = ((d / prev) * 100).toFixed(1);
-  return { d, pct, cls: d >= 0 ? 'up' : 'down', arrow: d >= 0 ? '▲' : '▼' };
-}
-
-function fmt(n) { return n.toLocaleString(); }
+const LATEST = MONTHLY.months.length - 1;
+function delta(cur,prev){ if(prev==null)return null; const d=cur-prev,pct=((d/prev)*100).toFixed(1); return{d,pct,cls:d>=0?'up':'down',arrow:d>=0?'▲':'▼'}; }
+function fmt(n){ return n.toLocaleString(); }
 </script>
 
 <!-- ════════════ HEADER ════════════ -->
@@ -133,20 +141,26 @@ function fmt(n) { return n.toLocaleString(); }
   </div>
 </div>
 
-<!-- ════════════ NAV ════════════ -->
+<!-- 기준월 선택 -->
 <div class="month-nav">
   <label>📅 기준월</label>
   <select id="month-sel" onchange="setMonth(this.value)"></select>
 </div>
 
+<!-- 탭 -->
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('monthly',this)">📊 월별 현황 (누적)</div>
+  <div class="tab" onclick="switchTab('daily',this)">📅 일별 현황 (당월)</div>
+</div>
+
+<!-- ════════════ 탭1: 월별 ════════════ -->
+<div id="panel-monthly" class="tab-panel active">
 <div class="container">
 
   <div class="hint">
-    💡 <strong>매월 업데이트 방법:</strong> 이 HTML 파일을 텍스트 편집기로 열어 상단 <code>DATA</code> 객체의 각 배열 끝에 해당 월 수치를 추가하세요.
-    저장 후 브라우저에서 다시 열면 모든 차트가 자동 갱신됩니다.
+    💡 <strong>매월 업데이트:</strong> HTML 파일 상단 <code>MONTHLY</code>의 각 배열 끝에 월 집계값을, <code>DAILY</code>에 해당 월 일별 데이터를 추가하세요.
   </div>
 
-  <!-- ── KPI ── -->
   <div class="kpi-row">
     <div class="kpi">
       <div class="kpi-label">월 전체 접수</div>
@@ -165,461 +179,411 @@ function fmt(n) { return n.toLocaleString(); }
     </div>
   </div>
 
-  <!-- ── 월별 합계 추이 ── -->
   <div class="card">
     <div class="section-title">월별 전체 접수건수 추이</div>
-    <div class="chart-wrap" style="height:220px">
-      <canvas id="c-trend"></canvas>
-    </div>
-    <p class="note">※ 현재 기준월 강조 표시</p>
+    <div class="chart-wrap" style="height:220px"><canvas id="c-trend"></canvas></div>
+    <p class="note">※ 기준월 포인트 강조</p>
   </div>
 
-  <!-- ── 대형/소형 stacked + 채널 비중 ── -->
   <div class="grid-2">
     <div class="card">
       <div class="section-title">대형 / 소형 구성 추이</div>
-      <div class="chart-wrap" style="height:240px">
-        <canvas id="c-stack"></canvas>
-      </div>
+      <div class="chart-wrap" style="height:240px"><canvas id="c-stack"></canvas></div>
     </div>
     <div class="card">
       <div class="section-title" id="pie-title">당월 소형 채널 비중</div>
-      <div class="chart-wrap" style="height:240px">
-        <canvas id="c-pie"></canvas>
-      </div>
+      <div class="chart-wrap" style="height:240px"><canvas id="c-pie"></canvas></div>
     </div>
   </div>
 
-  <!-- ── 소형 채널별 이번달 bar ── -->
   <div class="card">
     <div class="section-title" id="ch-bar-title">당월 소형 채널별 접수건수</div>
-    <div class="chart-wrap" style="height:180px">
-      <canvas id="c-chbar"></canvas>
-    </div>
+    <div class="chart-wrap" style="height:180px"><canvas id="c-chbar"></canvas></div>
   </div>
 
-  <!-- ── 소형 채널별 월별 추이 (multi-line) ── -->
   <div class="card">
     <div class="section-title">소형 채널별 월별 추이</div>
-    <div class="chart-wrap" style="height:260px">
-      <canvas id="c-multiline"></canvas>
-    </div>
+    <div class="chart-wrap" style="height:260px"><canvas id="c-multiline"></canvas></div>
   </div>
 
-  <!-- ── 월별 상세 테이블 ── -->
   <div class="card">
     <div class="section-title">월별 상세 현황표</div>
     <table>
-      <thead>
-        <tr>
-          <th>월</th>
-          <th>대형CMS</th><th>대형외</th><th>대형계</th>
-          <th>자사몰</th><th>네이버</th><th>카카오</th>
-          <th>29CM</th><th>이베이</th><th>기타</th>
-          <th>소형계</th><th style="background:#0d2a45">합계</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>월</th><th>대형CMS</th><th>대형외</th><th>대형계</th>
+        <th>자사몰</th><th>네이버</th><th>카카오</th><th>29CM</th><th>이베이</th><th>기타</th>
+        <th>소형계</th><th style="background:#0d2a45">합계</th>
+      </tr></thead>
       <tbody id="detail-tbody"></tbody>
       <tfoot id="detail-tfoot"></tfoot>
     </table>
     <p class="note">※ 기타 = 현대M포인트몰 + KBPAY + KREAM + 토스쇼핑 + 고향사랑기부제</p>
   </div>
 
-</div><!-- /container -->
+</div>
+</div>
 
-<!-- ════════════════════════════════════════════
-     JAVASCRIPT — 차트 렌더링
-     ════════════════════════════════════════════ -->
+<!-- ════════════ 탭2: 일별 ════════════ -->
+<div id="panel-daily" class="tab-panel">
+<div class="container">
+
+  <!-- 일별 KPI -->
+  <div class="day-kpi-row" id="day-kpi-row"></div>
+
+  <!-- 일별 추이 라인 -->
+  <div class="card">
+    <div class="section-title" id="day-trend-title">일별 전체 접수건수 추이</div>
+    <div class="chart-wrap" style="height:240px"><canvas id="c-day-trend"></canvas></div>
+    <p class="note">※ 1,000건 이상 기준선 표시 / 마우스 오버 시 채널별 상세</p>
+  </div>
+
+  <!-- 일별 채널 구성 stacked bar -->
+  <div class="card">
+    <div class="section-title" id="day-stack-title">일별 채널 구성</div>
+    <div class="chart-wrap" style="height:260px"><canvas id="c-day-stack"></canvas></div>
+  </div>
+
+  <!-- 일별 상세 테이블 -->
+  <div class="card">
+    <div class="section-title" id="day-table-title">일별 상세 현황표</div>
+    <table>
+      <thead><tr>
+        <th>날짜</th><th>대형CMS</th><th>대형외</th><th>대형계</th>
+        <th>자사몰</th><th>네이버</th><th>카카오</th><th>29CM</th><th>이베이</th><th>기타</th>
+        <th>소형계</th><th style="background:#0d2a45">합계</th>
+      </tr></thead>
+      <tbody id="day-tbody"></tbody>
+      <tfoot id="day-tfoot"></tfoot>
+    </table>
+    <p class="note">※ 1,000건 이상 행 강조 표시 | 기타 = 현대M포인트몰 + KBPAY + KREAM + 토스쇼핑 + 고향사랑기부제</p>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════ SCRIPT ════════════ -->
 <script>
-// ── 팔레트 (validated: CVD △E≥8, contrast pass) ──
-const PAL = {
-  자사몰:  '#2a78d6',
-  네이버:  '#eb6834',
-  카카오:  '#1baf7a',
-  '29CM':  '#eda100',
-  이베이:  '#e87ba4',
-  기타:    '#008300',
-};
+const PAL = { 자사몰:'#2a78d6', 네이버:'#eb6834', 카카오:'#1baf7a', '29CM':'#eda100', 이베이:'#e87ba4', 기타:'#008300' };
 const PAL_ARR = Object.values(PAL);
+const C_BLUE = '#2a78d6', C_ORG = '#eb6834';
+const gridOpts = { color:'rgba(0,0,0,0.05)', drawTicks:false };
 
-// single-series sequential: slot 1
-const C_BLUE   = '#2a78d6';
-const C_ORANGE = '#eb6834';
-const C_SURF   = '#f0f2f7'; // chart bg
-
-// ── 보고월 상태 ──
-let curIdx = LATEST;
-
-// ── 월 선택기 초기화 ──
-const sel = document.getElementById('month-sel');
-DATA.months.forEach((m, i) => {
-  const opt = document.createElement('option');
-  opt.value = i; opt.textContent = m + ' (기준)';
-  if (i === LATEST) opt.selected = true;
-  sel.appendChild(opt);
-});
-
-// ── 헤더 정보 ──
-document.getElementById('hdr-period').textContent =
-  '📊 집계기간: ' + DATA.months[0] + ' ~ ' + DATA.months[LATEST];
-document.getElementById('hdr-latest').textContent =
-  '최신: ' + DATA.months[LATEST];
-document.getElementById('hdr-generated').textContent =
-  '생성: ' + new Date().toLocaleDateString('ko-KR');
-
-// ─────────────────────────────────────────────
-//  KPI 업데이트
-// ─────────────────────────────────────────────
-function updateKPI(idx) {
-  const prev = idx > 0 ? idx - 1 : null;
-  const setKPI = (elId, dElId, cur, prv) => {
-    document.getElementById(elId).innerHTML = fmt(cur) + '<span>건</span>';
-    const d = delta(cur, prv);
-    const el = document.getElementById(dElId);
-    if (!d) { el.innerHTML = '<span class="neutral">전월 데이터 없음</span>'; return; }
-    el.innerHTML = `<span class="${d.cls}">${d.arrow} ${fmt(Math.abs(d.d))}건 (${d.pct}%) vs 전월</span>`;
-  };
-  setKPI('kpi-total', 'kpi-total-d', DATA.합계[idx], prev != null ? DATA.합계[prev] : null);
-  setKPI('kpi-large', 'kpi-large-d', DATA.대형합계[idx], prev != null ? DATA.대형합계[prev] : null);
-  setKPI('kpi-small', 'kpi-small-d', DATA.소형합계[idx], prev != null ? DATA.소형합계[prev] : null);
-}
-
-// ─────────────────────────────────────────────
-//  Chart.js 공통 defaults
-// ─────────────────────────────────────────────
-Chart.defaults.font.family = "'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif";
+Chart.defaults.font.family = "'Apple SD Gothic Neo','Noto Sans KR',sans-serif";
 Chart.defaults.font.size = 11;
 Chart.defaults.color = '#555';
 
-const gridOpts = {
-  color: 'rgba(0,0,0,0.05)',
-  drawTicks: false,
-};
+let curIdx = LATEST;
+let chartTrend, chartStack, chartPie, chartChbar, chartMulti, chartDayTrend, chartDayStack;
 
-// ─────────────────────────────────────────────
-//  1. 월별 합계 추이 — Line (single series)
-// ─────────────────────────────────────────────
-let chartTrend;
-function buildTrend(idx) {
-  const bgColors = DATA.months.map((_, i) =>
-    i === idx ? C_BLUE : 'rgba(42,120,214,0.25)');
-  const borderColors = DATA.months.map((_, i) =>
-    i === idx ? C_BLUE : 'rgba(42,120,214,0.5)');
+// ── 월 선택기 ──
+const sel = document.getElementById('month-sel');
+MONTHLY.months.forEach((m,i)=>{
+  const o=document.createElement('option');
+  o.value=i; o.textContent=m+' (기준)';
+  if(i===LATEST) o.selected=true;
+  sel.appendChild(o);
+});
 
-  if (chartTrend) { chartTrend.destroy(); }
-  chartTrend = new Chart(document.getElementById('c-trend'), {
-    type: 'line',
-    data: {
-      labels: DATA.months,
-      datasets: [{
-        data: DATA.합계,
-        borderColor: C_BLUE,
-        backgroundColor: 'rgba(42,120,214,0.08)',
-        borderWidth: 2,
-        pointRadius: DATA.months.map((_, i) => i === idx ? 7 : 4),
-        pointBackgroundColor: bgColors,
-        pointBorderColor: borderColors,
-        pointBorderWidth: 2,
-        tension: 0.3,
-        fill: true,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          mode: 'index', intersect: false,
-          callbacks: {
-            label: ctx => ` 합계 ${fmt(ctx.parsed.y)}건`,
-            afterBody: (items) => {
-              const i = items[0].dataIndex;
-              return [
-                ` 대형 ${fmt(DATA.대형합계[i])}건`,
-                ` 소형 ${fmt(DATA.소형합계[i])}건`,
-              ];
-            }
-          }
-        }
-      },
-      scales: {
-        x: { grid: gridOpts, ticks: { maxRotation: 0 } },
-        y: {
-          grid: gridOpts,
-          ticks: { callback: v => fmt(v) }
-        }
-      }
-    }
+document.getElementById('hdr-period').textContent='📊 집계기간: '+MONTHLY.months[0]+' ~ '+MONTHLY.months[LATEST];
+document.getElementById('hdr-latest').textContent='최신: '+MONTHLY.months[LATEST];
+document.getElementById('hdr-generated').textContent='생성: '+new Date().toLocaleDateString('ko-KR');
+
+// ── 탭 전환 ──
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// ── 기준월 변경 ──
+function setMonth(val) {
+  curIdx = parseInt(val);
+  renderMonthly(curIdx);
+  renderDaily(curIdx);
+}
+
+// ════════════════════════════
+//  월별 탭 렌더링
+// ════════════════════════════
+function renderMonthly(idx) {
+  updateKPI(idx);
+  buildTrend(idx);
+  buildStack(idx);
+  buildPie(idx);
+  buildChbar(idx);
+  buildTable(idx);
+  if(!chartMulti) buildMulti();
+}
+
+function updateKPI(idx){
+  const prev = idx>0?idx-1:null;
+  const set = (vid,did,cur,prv)=>{
+    document.getElementById(vid).innerHTML=fmt(cur)+'<span>건</span>';
+    const d=delta(cur,prv), el=document.getElementById(did);
+    if(!d){el.innerHTML='<span class="neutral">전월 없음</span>';return;}
+    el.innerHTML=`<span class="${d.cls}">${d.arrow} ${fmt(Math.abs(d.d))}건 (${d.pct}%) vs 전월</span>`;
+  };
+  set('kpi-total','kpi-total-d',MONTHLY.합계[idx],prev!=null?MONTHLY.합계[prev]:null);
+  set('kpi-large','kpi-large-d',MONTHLY.대형합계[idx],prev!=null?MONTHLY.대형합계[prev]:null);
+  set('kpi-small','kpi-small-d',MONTHLY.소형합계[idx],prev!=null?MONTHLY.소형합계[prev]:null);
+}
+
+function buildTrend(idx){
+  if(chartTrend) chartTrend.destroy();
+  chartTrend = new Chart(document.getElementById('c-trend'),{
+    type:'line',
+    data:{labels:MONTHLY.months,datasets:[{
+      data:MONTHLY.합계,borderColor:C_BLUE,backgroundColor:'rgba(42,120,214,0.08)',
+      borderWidth:2,tension:0.3,fill:true,
+      pointRadius:MONTHLY.months.map((_,i)=>i===idx?7:4),
+      pointBackgroundColor:MONTHLY.months.map((_,i)=>i===idx?C_BLUE:'rgba(42,120,214,0.3)'),
+      pointBorderColor:'#fff',pointBorderWidth:2,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,
+        callbacks:{label:ctx=>` 합계 ${fmt(ctx.parsed.y)}건`,
+          afterBody:items=>{const i=items[0].dataIndex;
+            return[` 대형 ${fmt(MONTHLY.대형합계[i])}건`,` 소형 ${fmt(MONTHLY.소형합계[i])}건`];}}}},
+      scales:{x:{grid:gridOpts,ticks:{maxRotation:0}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
   });
 }
 
-// ─────────────────────────────────────────────
-//  2. 대형/소형 stacked bar
-// ─────────────────────────────────────────────
-let chartStack;
-function buildStack(idx) {
-  const borderW = DATA.months.map((_, i) => i === idx ? 2.5 : 0);
-  const borderC = DATA.months.map((_, i) => i === idx ? '#1a3c5e' : 'transparent');
-  if (chartStack) chartStack.destroy();
-  chartStack = new Chart(document.getElementById('c-stack'), {
-    type: 'bar',
-    data: {
-      labels: DATA.months,
-      datasets: [
-        {
-          label: '소형',
-          data: DATA.소형합계,
-          backgroundColor: 'rgba(42,120,214,0.75)',
-          borderWidth: borderW, borderColor: borderC,
-          borderRadius: { topLeft: 4, topRight: 4 },
-          borderSkipped: 'bottom',
-        },
-        {
-          label: '대형',
-          data: DATA.대형합계,
-          backgroundColor: 'rgba(235,104,52,0.75)',
-          borderWidth: 0,
-          borderRadius: { topLeft: 0, topRight: 0 },
-          borderSkipped: 'top',
-        },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'top', labels: { boxWidth: 12, padding: 12 } },
-        tooltip: {
-          mode: 'index', intersect: false,
-          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건` }
-        }
-      },
-      scales: {
-        x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 0 } },
-        y: { stacked: true, grid: gridOpts, ticks: { callback: v => fmt(v) } }
-      }
-    }
+function buildStack(idx){
+  if(chartStack) chartStack.destroy();
+  const bw=MONTHLY.months.map((_,i)=>i===idx?2.5:0);
+  const bc=MONTHLY.months.map((_,i)=>i===idx?'#1a3c5e':'transparent');
+  chartStack = new Chart(document.getElementById('c-stack'),{
+    type:'bar',
+    data:{labels:MONTHLY.months,datasets:[
+      {label:'소형',data:MONTHLY.소형합계,backgroundColor:'rgba(42,120,214,0.75)',borderWidth:bw,borderColor:bc,borderRadius:{topLeft:4,topRight:4},borderSkipped:'bottom'},
+      {label:'대형',data:MONTHLY.대형합계,backgroundColor:'rgba(235,104,52,0.75)',borderWidth:0,borderSkipped:'top'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{boxWidth:12,padding:12}},
+        tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:0}},y:{stacked:true,grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
   });
 }
 
-// ─────────────────────────────────────────────
-//  3. 소형 채널 비중 (Doughnut) — 기준월
-// ─────────────────────────────────────────────
-let chartPie;
-function buildPie(idx) {
-  document.getElementById('pie-title').textContent =
-    DATA.months[idx] + ' 소형 채널 비중';
-  const labels = Object.keys(PAL);
-  const vals = labels.map(k => DATA.소형[k][idx]);
-  const total = vals.reduce((a, b) => a + b, 0);
-  if (chartPie) chartPie.destroy();
-  chartPie = new Chart(document.getElementById('c-pie'), {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{
-        data: vals,
-        backgroundColor: PAL_ARR,
-        borderWidth: 2,
-        borderColor: '#fff',
-        hoverBorderWidth: 3,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '58%',
-      plugins: {
-        legend: { position: 'right', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } },
-        tooltip: {
-          callbacks: {
-            label: ctx => {
-              const pct = ((ctx.parsed / total) * 100).toFixed(1);
-              return ` ${ctx.label}: ${fmt(ctx.parsed)}건 (${pct}%)`;
-            }
-          }
-        }
-      }
-    }
+function buildPie(idx){
+  document.getElementById('pie-title').textContent=MONTHLY.months[idx]+' 소형 채널 비중';
+  const labels=Object.keys(PAL), vals=labels.map(k=>MONTHLY.소형[k][idx]);
+  const total=vals.reduce((a,b)=>a+b,0);
+  if(chartPie) chartPie.destroy();
+  chartPie = new Chart(document.getElementById('c-pie'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:PAL_ARR,borderWidth:2,borderColor:'#fff',hoverBorderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{position:'right',labels:{boxWidth:12,padding:8,font:{size:11}}},
+        tooltip:{callbacks:{label:ctx=>{const pct=((ctx.parsed/total)*100).toFixed(1);return ` ${ctx.label}: ${fmt(ctx.parsed)}건 (${pct}%)`;}}}}}}
+  );
+}
+
+function buildChbar(idx){
+  document.getElementById('ch-bar-title').textContent=MONTHLY.months[idx]+' 소형 채널별 접수건수';
+  const labels=Object.keys(PAL), vals=labels.map(k=>MONTHLY.소형[k][idx]);
+  if(chartChbar) chartChbar.destroy();
+  chartChbar = new Chart(document.getElementById('c-chbar'),{
+    type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:PAL_ARR,borderRadius:4,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${fmt(ctx.parsed.x)}건`}}},
+      scales:{x:{grid:gridOpts,ticks:{callback:v=>fmt(v)}},y:{grid:{display:false}}},
+      animation:{onComplete:e=>{
+        const c=e.chart,ctx2=c.ctx; ctx2.save();
+        c.data.datasets[0].data.forEach((val,i)=>{
+          const bar=c.getDatasetMeta(0).data[i]; if(!bar)return;
+          ctx2.font='bold 11px Apple SD Gothic Neo'; ctx2.fillStyle='#333';
+          ctx2.textAlign='left'; ctx2.textBaseline='middle';
+          ctx2.fillText(fmt(val)+'건',bar.x+6,bar.y);
+        }); ctx2.restore();
+      }}}
   });
 }
 
-// ─────────────────────────────────────────────
-//  4. 소형 채널별 당월 horizontal bar
-// ─────────────────────────────────────────────
-let chartChbar;
-function buildChbar(idx) {
-  document.getElementById('ch-bar-title').textContent =
-    DATA.months[idx] + ' 소형 채널별 접수건수';
-  const labels = Object.keys(PAL);
-  const vals = labels.map(k => DATA.소형[k][idx]);
-  if (chartChbar) chartChbar.destroy();
-  chartChbar = new Chart(document.getElementById('c-chbar'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: vals,
-        backgroundColor: PAL_ARR,
-        borderRadius: 4,
-        borderWidth: 0,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      indexAxis: 'y',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ` ${fmt(ctx.parsed.x)}건` }
-        },
-        datalabels: { display: false }
-      },
-      scales: {
-        x: {
-          grid: gridOpts,
-          ticks: { callback: v => fmt(v) }
-        },
-        y: { grid: { display: false } }
-      },
-      // 직접 레이블 (저대비 색상 relief)
-      animation: { onComplete: (e) => drawBarLabels(e, 'c-chbar') }
-    }
+function buildMulti(){
+  if(chartMulti) chartMulti.destroy();
+  chartMulti = new Chart(document.getElementById('c-multiline'),{
+    type:'line',
+    data:{labels:MONTHLY.months,datasets:Object.keys(PAL).map((ch,ci)=>({
+      label:ch,data:MONTHLY.소형[ch],borderColor:PAL_ARR[ci],backgroundColor:'transparent',
+      borderWidth:2,pointRadius:4,pointBackgroundColor:PAL_ARR[ci],
+      pointBorderColor:'#fff',pointBorderWidth:1.5,tension:0.25,
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',labels:{boxWidth:12,padding:14}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},
+      scales:{x:{grid:gridOpts,ticks:{maxRotation:0}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
   });
 }
 
-// 직접 레이블 그리기 (저대비 채널용 relief)
-function drawBarLabels(e, canvasId) {
-  const chart = e.chart;
-  const ctx2 = chart.ctx;
-  ctx2.save();
-  chart.data.datasets[0].data.forEach((val, i) => {
-    const meta = chart.getDatasetMeta(0);
-    const bar = meta.data[i];
-    if (!bar) return;
-    ctx2.font = 'bold 11px Apple SD Gothic Neo';
-    ctx2.fillStyle = '#333';
-    ctx2.textAlign = 'left';
-    ctx2.textBaseline = 'middle';
-    const x = bar.x + 6;
-    const y = bar.y;
-    ctx2.fillText(fmt(val) + '건', x, y);
-  });
-  ctx2.restore();
-}
-
-// ─────────────────────────────────────────────
-//  5. 소형 채널별 월별 multi-line
-// ─────────────────────────────────────────────
-let chartMulti;
-function buildMulti() {
-  const channels = Object.keys(PAL);
-  if (chartMulti) chartMulti.destroy();
-  chartMulti = new Chart(document.getElementById('c-multiline'), {
-    type: 'line',
-    data: {
-      labels: DATA.months,
-      datasets: channels.map((ch, ci) => ({
-        label: ch,
-        data: DATA.소형[ch],
-        borderColor: PAL_ARR[ci],
-        backgroundColor: 'transparent',
-        borderWidth: 2,
-        pointRadius: 4,
-        pointBackgroundColor: PAL_ARR[ci],
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1.5,
-        tension: 0.25,
-      }))
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: { boxWidth: 12, padding: 14, font: { size: 11 } }
-        },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`
-          }
-        }
-      },
-      scales: {
-        x: { grid: gridOpts, ticks: { maxRotation: 0 } },
-        y: { grid: gridOpts, ticks: { callback: v => fmt(v) } }
-      }
-    }
-  });
-}
-
-// ─────────────────────────────────────────────
-//  6. 상세 테이블
-// ─────────────────────────────────────────────
-function buildTable(idx) {
-  const tbody = document.getElementById('detail-tbody');
-  tbody.innerHTML = '';
-  DATA.months.forEach((m, i) => {
-    const isCur = i === idx;
-    const style = isCur ? 'background:#eef5ff;font-weight:700;' : '';
-    tbody.innerHTML += `<tr style="${style}">
-      <td class="left">${m}${isCur ? ' ◀' : ''}</td>
-      <td>${fmt(DATA.대형CMS[i])}</td>
-      <td>${fmt(DATA.대형외[i])}</td>
-      <td><strong>${fmt(DATA.대형합계[i])}</strong></td>
-      <td>${fmt(DATA.소형.자사몰[i])}</td>
-      <td>${fmt(DATA.소형.네이버[i])}</td>
-      <td>${fmt(DATA.소형.카카오[i])}</td>
-      <td>${fmt(DATA.소형["29CM"][i])}</td>
-      <td>${fmt(DATA.소형.이베이[i])}</td>
-      <td>${fmt(DATA.소형.기타[i])}</td>
-      <td><strong>${fmt(DATA.소형합계[i])}</strong></td>
-      <td style="background:#f0f5ff"><strong>${fmt(DATA.합계[i])}</strong></td>
+function buildTable(idx){
+  const tbody=document.getElementById('detail-tbody');
+  tbody.innerHTML='';
+  MONTHLY.months.forEach((m,i)=>{
+    const cur=i===idx, st=cur?'background:#eef5ff;font-weight:700;':'';
+    tbody.innerHTML+=`<tr style="${st}">
+      <td class="left">${m}${cur?' ◀':''}</td>
+      <td>${fmt(MONTHLY.대형CMS[i])}</td><td>${fmt(MONTHLY.대형외[i])}</td><td><strong>${fmt(MONTHLY.대형합계[i])}</strong></td>
+      <td>${fmt(MONTHLY.소형.자사몰[i])}</td><td>${fmt(MONTHLY.소형.네이버[i])}</td><td>${fmt(MONTHLY.소형.카카오[i])}</td>
+      <td>${fmt(MONTHLY.소형["29CM"][i])}</td><td>${fmt(MONTHLY.소형.이베이[i])}</td><td>${fmt(MONTHLY.소형.기타[i])}</td>
+      <td><strong>${fmt(MONTHLY.소형합계[i])}</strong></td>
+      <td style="background:#f0f5ff"><strong>${fmt(MONTHLY.합계[i])}</strong></td>
     </tr>`;
   });
-
-  // 합계행
-  const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-  const tfoot = document.getElementById('detail-tfoot');
-  tfoot.innerHTML = `<tr style="background:#1a3c5e;color:#fff;font-weight:700;">
+  const s=arr=>arr.reduce((a,b)=>a+b,0);
+  document.getElementById('detail-tfoot').innerHTML=`<tr style="background:#1a3c5e;color:#fff;font-weight:700;">
     <td class="left">합계</td>
-    <td>${fmt(sum(DATA.대형CMS))}</td>
-    <td>${fmt(sum(DATA.대형외))}</td>
-    <td>${fmt(sum(DATA.대형합계))}</td>
-    <td>${fmt(sum(DATA.소형.자사몰))}</td>
-    <td>${fmt(sum(DATA.소형.네이버))}</td>
-    <td>${fmt(sum(DATA.소형.카카오))}</td>
-    <td>${fmt(sum(DATA.소형["29CM"]))}</td>
-    <td>${fmt(sum(DATA.소형.이베이))}</td>
-    <td>${fmt(sum(DATA.소형.기타))}</td>
-    <td>${fmt(sum(DATA.소형합계))}</td>
-    <td style="background:#0d2a45">${fmt(sum(DATA.합계))}</td>
+    <td>${fmt(s(MONTHLY.대형CMS))}</td><td>${fmt(s(MONTHLY.대형외))}</td><td>${fmt(s(MONTHLY.대형합계))}</td>
+    <td>${fmt(s(MONTHLY.소형.자사몰))}</td><td>${fmt(s(MONTHLY.소형.네이버))}</td><td>${fmt(s(MONTHLY.소형.카카오))}</td>
+    <td>${fmt(s(MONTHLY.소형["29CM"]))}</td><td>${fmt(s(MONTHLY.소형.이베이))}</td><td>${fmt(s(MONTHLY.소형.기타))}</td>
+    <td>${fmt(s(MONTHLY.소형합계))}</td><td style="background:#0d2a45">${fmt(s(MONTHLY.합계))}</td>
   </tr>`;
 }
 
-// ─────────────────────────────────────────────
-//  setMonth — 기준월 변경 시 전체 갱신
-// ─────────────────────────────────────────────
-function setMonth(val) {
-  curIdx = parseInt(val);
-  updateKPI(curIdx);
-  buildTrend(curIdx);
-  buildStack(curIdx);
-  buildPie(curIdx);
-  buildChbar(curIdx);
-  buildTable(curIdx);
-  // multiline은 기준월 무관 (전체 표시)
+// ════════════════════════════
+//  일별 탭 렌더링
+// ════════════════════════════
+function renderDaily(idx){
+  const month = MONTHLY.months[idx];
+  const rows = DAILY[month] || [];
+
+  // 제목 업데이트
+  ['day-trend-title','day-stack-title','day-table-title'].forEach(id=>{
+    document.getElementById(id).textContent = {
+      'day-trend-title': month+' 일별 전체 접수건수 추이',
+      'day-stack-title': month+' 일별 채널 구성',
+      'day-table-title': month+' 일별 상세 현황표',
+    }[id];
+  });
+
+  if(!rows.length){
+    document.getElementById('day-kpi-row').innerHTML='<div style="color:#999;font-size:13px;padding:20px 0;">해당 월 일별 데이터가 없습니다.</div>';
+    return;
+  }
+
+  // 일별 KPI
+  const totals = rows.map(r=>r['합']);
+  const maxDay = rows.reduce((a,b)=>b['합']>a['합']?b:a);
+  const minDay = rows.reduce((a,b)=>b['합']<a['합']?b:a);
+  const avg = Math.round(totals.reduce((a,b)=>a+b,0)/totals.length);
+  const over1000 = rows.filter(r=>r['합']>=1000).length;
+  document.getElementById('day-kpi-row').innerHTML=`
+    <div class="day-kpi"><div class="day-kpi-label">월 영업일</div>
+      <div class="day-kpi-val">${rows.length}<span>일</span></div>
+      <div class="day-kpi-sub">일평균 ${fmt(avg)}건</div></div>
+    <div class="day-kpi"><div class="day-kpi-label">최고 접수일</div>
+      <div class="day-kpi-val">${fmt(maxDay['합'])}<span>건</span></div>
+      <div class="day-kpi-sub">${maxDay['d']}</div></div>
+    <div class="day-kpi"><div class="day-kpi-label">최저 접수일</div>
+      <div class="day-kpi-val">${fmt(minDay['합'])}<span>건</span></div>
+      <div class="day-kpi-sub">${minDay['d']}</div></div>
+    <div class="day-kpi"><div class="day-kpi-label">1,000건 이상 일수</div>
+      <div class="day-kpi-val">${over1000}<span>일</span></div>
+      <div class="day-kpi-sub">전체 영업일의 ${((over1000/rows.length)*100).toFixed(0)}%</div></div>
+  `;
+
+  // 일별 추이 라인
+  if(chartDayTrend) chartDayTrend.destroy();
+  chartDayTrend = new Chart(document.getElementById('c-day-trend'),{
+    type:'line',
+    data:{labels:rows.map(r=>r['d'].slice(5)),datasets:[{
+      data:rows.map(r=>r['합']),
+      borderColor:C_BLUE,backgroundColor:'rgba(42,120,214,0.08)',
+      borderWidth:2,tension:0.3,fill:true,
+      pointRadius:rows.map(r=>r['합']>=1000?7:4),
+      pointBackgroundColor:rows.map(r=>r['합']>=1000?'#e63333':C_BLUE),
+      pointBorderColor:'#fff',pointBorderWidth:1.5,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{mode:'index',intersect:false,callbacks:{
+          title:items=>[rows[items[0].dataIndex]['d']],
+          label:ctx=>` 합계: ${fmt(ctx.parsed.y)}건`,
+          afterBody:items=>{
+            const r=rows[items[0].dataIndex];
+            return[
+              ` 대형CMS: ${fmt(r.cms)}  대형외: ${fmt(r['외'])}  → ${fmt(r.cms+r['외'])}건`,
+              ` 자사몰: ${fmt(r['자'])}  네이버: ${fmt(r['네'])}  카카오: ${fmt(r['카'])}`,
+              ` 29CM: ${fmt(r['29'])}  이베이: ${fmt(r['이'])}  기타: ${fmt(r['기'])}`,
+            ];
+          }
+        }}},
+      scales:{
+        x:{grid:gridOpts,ticks:{maxRotation:45,font:{size:10}}},
+        y:{grid:gridOpts,ticks:{callback:v=>fmt(v)},
+          // 1500건 기준선 플러그인
+        }
+      },
+      plugins:[{
+        id:'refLine',
+        afterDraw(chart){
+          const {ctx:c,chartArea:{left,right},scales:{y}}=chart;
+          const yPos=y.getPixelForValue(1000);
+          c.save(); c.setLineDash([5,4]);
+          c.strokeStyle='rgba(230,51,51,0.5)'; c.lineWidth=1.5;
+          c.beginPath(); c.moveTo(left,yPos); c.lineTo(right,yPos); c.stroke();
+          c.fillStyle='rgba(230,51,51,0.7)'; c.font='bold 10px sans-serif';
+          c.fillText('1,000건',right-48,yPos-4); c.restore();
+        }
+      }]
+    }
+  });
+
+  // 일별 stacked bar (소형 채널)
+  if(chartDayStack) chartDayStack.destroy();
+  chartDayStack = new Chart(document.getElementById('c-day-stack'),{
+    type:'bar',
+    data:{labels:rows.map(r=>r['d'].slice(5)),datasets:[
+      {label:'자사몰',data:rows.map(r=>r['자']),backgroundColor:'rgba(42,120,214,0.8)',borderWidth:0,borderRadius:0},
+      {label:'네이버',data:rows.map(r=>r['네']),backgroundColor:'rgba(235,104,52,0.8)',borderWidth:0},
+      {label:'카카오',data:rows.map(r=>r['카']),backgroundColor:'rgba(27,175,122,0.8)',borderWidth:0},
+      {label:'29CM',data:rows.map(r=>r['29']),backgroundColor:'rgba(237,161,0,0.8)',borderWidth:0},
+      {label:'이베이',data:rows.map(r=>r['이']),backgroundColor:'rgba(232,123,164,0.8)',borderWidth:0},
+      {label:'기타(소형)',data:rows.map(r=>r['기']),backgroundColor:'rgba(0,131,0,0.8)',borderWidth:0},
+      {label:'대형',data:rows.map(r=>r.cms+r['외']),backgroundColor:'rgba(180,180,180,0.7)',borderWidth:0,borderRadius:{topLeft:3,topRight:3}},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{boxWidth:12,padding:10}},
+        tooltip:{mode:'index',intersect:false,callbacks:{
+          title:items=>[rows[items[0].dataIndex]['d']],
+          label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{maxRotation:45,font:{size:10}}},
+        y:{stacked:true,grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
+  });
+
+  // 일별 테이블
+  const tbody=document.getElementById('day-tbody');
+  tbody.innerHTML='';
+  rows.forEach(r=>{
+    const 대형=r.cms+r['외'], 소형=r['자']+r['네']+r['카']+r['29']+r['이']+r['기'];
+    const big=r['합']>=1000;
+    tbody.innerHTML+=`<tr class="${big?'alert-row':''}">
+      <td class="left">${r['d']}${big?' 🔴':''}</td>
+      <td>${fmt(r.cms)}</td><td>${fmt(r['외'])}</td><td><strong>${fmt(대형)}</strong></td>
+      <td>${fmt(r['자'])}</td><td>${fmt(r['네'])}</td><td>${fmt(r['카'])}</td>
+      <td>${fmt(r['29'])}</td><td>${fmt(r['이'])}</td><td>${fmt(r['기'])}</td>
+      <td><strong>${fmt(소형)}</strong></td>
+      <td style="background:#f0f5ff"><strong>${fmt(r['합'])}</strong></td>
+    </tr>`;
+  });
+  // 합계행
+  const s=key=>rows.reduce((a,r)=>a+(r[key]||0),0);
+  const 대형tot=s('cms')+s('외'), 소형tot=s('자')+s('네')+s('카')+s('29')+s('이')+s('기');
+  document.getElementById('day-tfoot').innerHTML=`<tr style="background:#1a3c5e;color:#fff;font-weight:700;">
+    <td class="left">합계</td>
+    <td>${fmt(s('cms'))}</td><td>${fmt(s('외'))}</td><td>${fmt(대형tot)}</td>
+    <td>${fmt(s('자'))}</td><td>${fmt(s('네'))}</td><td>${fmt(s('카'))}</td>
+    <td>${fmt(s('29'))}</td><td>${fmt(s('이'))}</td><td>${fmt(s('기'))}</td>
+    <td>${fmt(소형tot)}</td><td style="background:#0d2a45">${fmt(s('합'))}</td>
+  </tr>`;
 }
 
 // ── 초기 렌더링 ──
-(function init() {
-  updateKPI(LATEST);
-  buildTrend(LATEST);
-  buildStack(LATEST);
-  buildPie(LATEST);
-  buildChbar(LATEST);
-  buildMulti();
-  buildTable(LATEST);
-})();
+renderMonthly(LATEST);
+renderDaily(LATEST);
 </script>
 </body>
 </html>
