@@ -486,6 +486,7 @@ function renderDaily(idx){
   chartDayTrend = new Chart(document.getElementById('c-day-trend'),{
     type:'line',
     data:{labels:rows.map(r=>r['d'].slice(5)),datasets:[{
+      label:'일별 합계',
       data:rows.map(r=>r['합']),
       borderColor:C_BLUE,backgroundColor:'rgba(42,120,214,0.08)',
       borderWidth:2,tension:0.3,fill:true,
@@ -495,7 +496,7 @@ function renderDaily(idx){
     }]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},
-        tooltip:{mode:'index',intersect:false,callbacks:{
+        tooltip:{mode:'nearest',intersect:false,callbacks:{
           title:items=>[rows[items[0].dataIndex]['d']],
           label:ctx=>` 합계: ${fmt(ctx.parsed.y)}건`,
           afterBody:items=>{
