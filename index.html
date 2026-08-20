@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>우체국 택배 월별 현황 보고</title>
+<title>TERAROSA 우체국 택배 월별 현황</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -494,6 +494,18 @@ function renderDaily(idx){
       pointBackgroundColor:rows.map(r=>r['합']>=1000?'#e63333':C_BLUE),
       pointBorderColor:'#fff',pointBorderWidth:1.5,
     }]},
+    plugins:[{
+      id:'refLine',
+      afterDraw(chart){
+        const {ctx:c,chartArea:{left,right},scales:{y}}=chart;
+        const yPos=y.getPixelForValue(1000);
+        c.save(); c.setLineDash([5,4]);
+        c.strokeStyle='rgba(230,51,51,0.5)'; c.lineWidth=1.5;
+        c.beginPath(); c.moveTo(left,yPos); c.lineTo(right,yPos); c.stroke();
+        c.fillStyle='rgba(230,51,51,0.7)'; c.font='bold 10px sans-serif';
+        c.fillText('1,000건',right-48,yPos-4); c.restore();
+      }
+    }],
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},
         tooltip:{mode:'nearest',intersect:false,callbacks:{
@@ -502,7 +514,7 @@ function renderDaily(idx){
           afterBody:items=>{
             const r=rows[items[0].dataIndex];
             return[
-              ` 대형CMS: ${fmt(r.cms)}  대형외: ${fmt(r['외'])}  → ${fmt(r.cms+r['외'])}건`,
+              ` 도매몰: ${fmt(r.cms)}  도매몰 외: ${fmt(r['외'])}  → ${fmt(r.cms+r['외'])}건`,
               ` 자사몰: ${fmt(r['자'])}  네이버: ${fmt(r['네'])}  카카오: ${fmt(r['카'])}`,
               ` 29CM: ${fmt(r['29'])}  이베이: ${fmt(r['이'])}  기타: ${fmt(r['기'])}`,
             ];
@@ -510,22 +522,8 @@ function renderDaily(idx){
         }}},
       scales:{
         x:{grid:gridOpts,ticks:{maxRotation:45,font:{size:10}}},
-        y:{grid:gridOpts,ticks:{callback:v=>fmt(v)},
-          // 1500건 기준선 플러그인
-        }
-      },
-      plugins:[{
-        id:'refLine',
-        afterDraw(chart){
-          const {ctx:c,chartArea:{left,right},scales:{y}}=chart;
-          const yPos=y.getPixelForValue(1000);
-          c.save(); c.setLineDash([5,4]);
-          c.strokeStyle='rgba(230,51,51,0.5)'; c.lineWidth=1.5;
-          c.beginPath(); c.moveTo(left,yPos); c.lineTo(right,yPos); c.stroke();
-          c.fillStyle='rgba(230,51,51,0.7)'; c.font='bold 10px sans-serif';
-          c.fillText('1,000건',right-48,yPos-4); c.restore();
-        }
-      }]
+        y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}
+      }
     }
   });
 
