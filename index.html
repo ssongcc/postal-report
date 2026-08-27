@@ -112,10 +112,10 @@ function fmt(n){ return n.toLocaleString(); }
   <select id="month-sel" onchange="setMonth(this.value)"></select>
 </div>
 <div class="tab-bar">
-  <div class="tab active" onclick="switchTab('monthly',this)">📊 월별 현황 (누적)</div>
-  <div class="tab" onclick="switchTab('daily',this)">📅 일별 현황 (당월)</div>
+  <div class="tab active" onclick="switchTab('daily',this)">📅 일별 현황 (당월)</div>
+  <div class="tab" onclick="switchTab('monthly',this)">📊 월별 현황 (누적)</div>
 </div>
-<div id="panel-monthly" class="tab-panel active">
+<div id="panel-monthly" class="tab-panel">
 <div class="container">
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-label">월 전체 접수</div><div class="kpi-val" id="kpi-total">—<span>건</span></div><div class="kpi-delta" id="kpi-total-d"></div></div>
@@ -137,7 +137,7 @@ function fmt(n){ return n.toLocaleString(); }
   </div>
 </div>
 </div>
-<div id="panel-daily" class="tab-panel">
+<div id="panel-daily" class="tab-panel active">
 <div class="container">
   <div class="day-kpi-row" id="day-kpi-row"></div>
   <div class="card"><div class="section-title" id="day-trend-title">일별 전체 접수건수 추이</div><div class="chart-wrap" style="height:240px"><canvas id="c-day-trend"></canvas></div><p class="note">※ 1,000건 이상 기준선 표시 / 마우스 오버 시 채널별 상세</p></div>
