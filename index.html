@@ -9,39 +9,54 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
        background: #f0f2f7; color: #1a2332; font-size: 14px; }
+
 .header { background: #ffffff; border-bottom: 1px solid #e2e6ef;
           padding: 20px 40px 18px; display: flex; align-items: center; gap: 28px; }
+.header-logo svg { display: block; }
 .header-divider { width: 1px; height: 44px; background: #d0d5de; flex-shrink: 0; }
 .header-text { flex: 1; }
 .header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: #1a2332; margin-bottom: 5px; }
 .header-meta { font-size: 12px; color: #888; display: flex; gap: 20px; flex-wrap: wrap; }
+
 .month-nav { background: #fff; border-bottom: 1px solid #e2e6ef;
              padding: 10px 40px; display: flex; align-items: center; gap: 8px; }
 .month-nav label { font-size: 12px; color: #555; font-weight: 600; }
 .month-nav select { border: 1px solid #c8d0de; border-radius: 6px; padding: 5px 10px;
                     font-size: 13px; color: #1a2332; background: #fff; cursor: pointer; }
-.tab-bar { background: #fff; border-bottom: 2px solid #e2e6ef; padding: 0 40px; display: flex; }
+
+.tab-bar { background: #fff; border-bottom: 2px solid #e2e6ef;
+           padding: 0 40px; display: flex; gap: 0; }
 .tab { padding: 12px 22px; font-size: 13px; font-weight: 600; color: #888;
-       cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+       cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
+       transition: all 0.15s; }
 .tab:hover { color: #2a78d6; }
 .tab.active { color: #2a78d6; border-bottom-color: #2a78d6; }
+
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
+
 .container { max-width: 1160px; margin: 0 auto; padding: 28px 24px; }
-.section-title { font-size: 13px; font-weight: 700; color: #1a3c5e; margin-bottom: 14px;
-                 padding-left: 10px; border-left: 4px solid #2a78d6; }
+.section-title { font-size: 13px; font-weight: 700; color: #1a3c5e;
+                 margin-bottom: 14px; padding-left: 10px;
+                 border-left: 4px solid #2a78d6; }
+
 .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
-.kpi { background: #fff; border-radius: 12px; padding: 18px 22px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+.kpi { background: #fff; border-radius: 12px; padding: 18px 22px;
+       box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
 .kpi-label { font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px; }
 .kpi-val { font-size: 30px; font-weight: 800; color: #1a3c5e; line-height: 1.1; }
 .kpi-val span { font-size: 14px; font-weight: 400; color: #888; margin-left: 2px; }
 .kpi-delta { font-size: 12px; font-weight: 700; margin-top: 6px; }
-.up { color: #1baf7a; } .down { color: #eb6834; } .neutral { color: #888; }
+.up   { color: #1baf7a; }
+.down { color: #eb6834; }
+.neutral { color: #888; }
+
 .card { background: #fff; border-radius: 12px; padding: 22px 24px;
         box-shadow: 0 1px 6px rgba(0,0,0,0.06); margin-bottom: 22px; }
 .chart-wrap { position: relative; }
 .note { font-size: 11px; color: #999; margin-top: 10px; text-align: right; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+
 table { width: 100%; border-collapse: collapse; }
 thead tr { background: #1a3c5e; color: #fff; }
 thead th { padding: 9px 12px; font-size: 12px; font-weight: 600; text-align: center; }
@@ -49,10 +64,13 @@ tbody tr { border-bottom: 1px solid #eef0f5; }
 tbody tr:hover { background: #f4f7ff; }
 td { padding: 8px 12px; font-size: 12px; text-align: center; }
 td.left { text-align: left; }
+
 .alert-row { background: #fff4f0; }
 .alert-row td { color: #c0392b; font-weight: 700; }
+
 .day-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-.day-kpi { background: #fff; border-radius: 10px; padding: 14px 18px; box-shadow: 0 1px 5px rgba(0,0,0,0.06); }
+.day-kpi { background: #fff; border-radius: 10px; padding: 14px 18px;
+           box-shadow: 0 1px 5px rgba(0,0,0,0.06); }
 .day-kpi-label { font-size: 11px; color: #666; font-weight: 600; margin-bottom: 3px; }
 .day-kpi-val { font-size: 22px; font-weight: 800; color: #1a3c5e; }
 .day-kpi-val span { font-size: 12px; font-weight: 400; color: #888; margin-left: 2px; }
@@ -60,7 +78,22 @@ td.left { text-align: left; }
 </style>
 </head>
 <body>
+
 <script>
+const MONTHLY = {
+  months: ["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"],
+  대형CMS: [1295,1241,1518,1666,1304,1528,1594,1390],
+  대형외:  [2205,2313,2259,2620,2145,2298,2274,2503],
+  소형: {
+    자사몰: [8822,9400,10249,9008,7375,16808,9202,8832],
+    네이버: [1875,2194,2026,1817,1872,1562,1725,1620],
+    카카오: [1643,1512,1539,1127,1258,1139,960,1155],
+    "29CM": [356,396,236,200,149,224,126,132],
+    이베이: [0,0,0,0,954,223,77,99],
+    기타:   [2,42,37,56,95,37,55,143],
+  }
+};
+
 const DAILY = {
 "2026-01":[{"d":"2026-01-02","cms":40,"외":62,"자":1588,"네":53,"카":131,"29":1,"이":0,"기":0,"합":1875},{"d":"2026-01-05","cms":107,"외":134,"자":718,"네":249,"카":187,"29":68,"이":0,"기":0,"합":1463},{"d":"2026-01-06","cms":58,"외":79,"자":272,"네":77,"카":88,"29":17,"이":0,"기":0,"합":591},{"d":"2026-01-07","cms":41,"외":101,"자":198,"네":84,"카":74,"29":15,"이":0,"기":0,"합":513},{"d":"2026-01-08","cms":61,"외":55,"자":220,"네":80,"카":83,"29":8,"이":0,"기":0,"합":507},{"d":"2026-01-09","cms":41,"외":71,"자":235,"네":59,"카":62,"29":8,"이":0,"기":0,"합":476},{"d":"2026-01-12","cms":52,"외":160,"자":531,"네":151,"카":226,"29":36,"이":0,"기":0,"합":1156},{"d":"2026-01-13","cms":74,"외":94,"자":248,"네":88,"카":78,"29":15,"이":0,"기":0,"합":597},{"d":"2026-01-14","cms":62,"외":97,"자":240,"네":74,"카":55,"29":16,"이":0,"기":0,"합":544},{"d":"2026-01-15","cms":41,"외":101,"자":240,"네":64,"카":48,"29":17,"이":0,"기":0,"합":511},{"d":"2026-01-16","cms":69,"외":213,"자":214,"네":67,"카":49,"29":10,"이":0,"기":0,"합":622},{"d":"2026-01-19","cms":108,"외":136,"자":638,"네":130,"카":145,"29":30,"이":0,"기":0,"합":1187},{"d":"2026-01-20","cms":56,"외":156,"자":364,"네":65,"카":33,"29":11,"이":0,"기":0,"합":685},{"d":"2026-01-21","cms":61,"외":124,"자":301,"네":68,"카":47,"29":8,"이":0,"기":0,"합":609},{"d":"2026-01-22","cms":68,"외":77,"자":263,"네":64,"카":50,"29":18,"이":0,"기":0,"합":540},{"d":"2026-01-23","cms":48,"외":103,"자":298,"네":72,"카":29,"29":11,"이":0,"기":0,"합":561},{"d":"2026-01-26","cms":57,"외":106,"자":889,"네":113,"카":104,"29":26,"이":0,"기":0,"합":1295},{"d":"2026-01-27","cms":73,"외":105,"자":469,"네":89,"카":42,"29":9,"이":0,"기":1,"합":788},{"d":"2026-01-28","cms":45,"외":84,"자":331,"네":75,"카":44,"29":13,"이":0,"기":0,"합":592},{"d":"2026-01-29","cms":95,"외":77,"자":276,"네":82,"카":30,"29":8,"이":0,"기":1,"합":569},{"d":"2026-01-30","cms":38,"외":70,"자":289,"네":71,"카":38,"29":11,"이":0,"기":0,"합":517}],
 "2026-02":[{"d":"2026-02-02","cms":59,"외":100,"자":911,"네":207,"카":105,"29":21,"이":0,"기":8,"합":1411},{"d":"2026-02-03","cms":84,"외":117,"자":616,"네":98,"카":41,"29":19,"이":0,"기":3,"합":978},{"d":"2026-02-04","cms":64,"외":148,"자":329,"네":101,"카":43,"29":23,"이":0,"기":1,"합":709},{"d":"2026-02-05","cms":45,"외":101,"자":404,"네":83,"카":32,"29":28,"이":0,"기":0,"합":693},{"d":"2026-02-06","cms":60,"외":94,"자":296,"네":101,"카":40,"29":24,"이":0,"기":0,"합":615},{"d":"2026-02-09","cms":122,"외":210,"자":956,"네":311,"카":129,"29":66,"이":0,"기":4,"합":1798},{"d":"2026-02-10","cms":141,"외":343,"자":777,"네":203,"카":75,"29":18,"이":0,"기":5,"합":1562},{"d":"2026-02-11","cms":96,"외":295,"자":578,"네":169,"카":60,"29":32,"이":0,"기":5,"합":1235},{"d":"2026-02-12","cms":92,"외":90,"자":535,"네":146,"카":72,"29":31,"이":0,"기":0,"합":966},{"d":"2026-02-19","cms":67,"외":72,"자":958,"네":258,"카":487,"29":82,"이":0,"기":0,"합":1924},{"d":"2026-02-20","cms":76,"외":117,"자":962,"네":61,"카":58,"29":6,"이":0,"기":8,"합":1288},{"d":"2026-02-23","cms":64,"외":92,"자":786,"네":172,"카":172,"29":24,"이":0,"기":3,"합":1313},{"d":"2026-02-24","cms":83,"외":205,"자":353,"네":91,"카":54,"29":6,"이":0,"기":2,"합":794},{"d":"2026-02-25","cms":44,"외":135,"자":323,"네":73,"카":39,"29":5,"이":0,"기":2,"합":621},{"d":"2026-02-26","cms":69,"외":77,"자":330,"네":64,"카":63,"29":6,"이":0,"기":0,"합":609},{"d":"2026-02-27","cms":75,"외":117,"자":286,"네":56,"카":42,"29":5,"이":0,"기":1,"합":582}],
@@ -69,27 +102,7 @@ const DAILY = {
 "2026-05":[{"d":"2026-05-04","cms":65,"외":90,"자":967,"네":186,"카":87,"29":14,"이":0,"기":14,"합":1423},{"d":"2026-05-06","cms":81,"외":207,"자":601,"네":125,"카":75,"29":8,"이":0,"기":16,"합":1113},{"d":"2026-05-07","cms":81,"외":117,"자":417,"네":81,"카":32,"29":11,"이":0,"기":7,"합":746},{"d":"2026-05-08","cms":57,"외":66,"자":313,"네":71,"카":37,"29":6,"이":1,"기":5,"합":556},{"d":"2026-05-11","cms":76,"외":171,"자":740,"네":162,"카":125,"29":20,"이":607,"기":12,"합":1913},{"d":"2026-05-12","cms":96,"외":102,"자":357,"네":113,"카":64,"29":6,"이":34,"기":6,"합":778},{"d":"2026-05-13","cms":53,"외":113,"자":315,"네":86,"카":66,"29":9,"이":36,"기":6,"합":684},{"d":"2026-05-14","cms":65,"외":81,"자":314,"네":63,"카":60,"29":5,"이":33,"기":4,"합":625},{"d":"2026-05-15","cms":48,"외":99,"자":236,"네":47,"카":60,"29":9,"이":27,"기":2,"합":528},{"d":"2026-05-18","cms":89,"외":158,"자":607,"네":135,"카":284,"29":17,"이":92,"기":7,"합":1389},{"d":"2026-05-19","cms":73,"외":115,"자":277,"네":65,"카":45,"29":8,"이":48,"기":3,"합":634},{"d":"2026-05-20","cms":73,"외":128,"자":271,"네":61,"카":56,"29":3,"이":38,"기":4,"합":634},{"d":"2026-05-21","cms":70,"외":109,"자":287,"네":61,"카":39,"29":9,"이":7,"기":1,"합":583},{"d":"2026-05-22","cms":92,"외":107,"자":250,"네":45,"카":40,"29":3,"이":5,"기":1,"합":543},{"d":"2026-05-26","cms":104,"외":180,"자":692,"네":413,"카":94,"29":13,"이":4,"기":3,"합":1503},{"d":"2026-05-27","cms":62,"외":94,"자":264,"네":50,"카":31,"29":1,"이":4,"기":2,"합":508},{"d":"2026-05-28","cms":72,"외":116,"자":231,"네":59,"카":29,"29":3,"이":9,"기":0,"합":519},{"d":"2026-05-29","cms":47,"외":92,"자":236,"네":49,"카":34,"29":4,"이":9,"기":2,"합":473}],
 "2026-06":[{"d":"2026-06-01","cms":70,"외":126,"자":664,"네":138,"카":95,"29":3,"이":30,"기":2,"합":1128},{"d":"2026-06-02","cms":111,"외":114,"자":1186,"네":65,"카":40,"29":5,"이":11,"기":2,"합":1534},{"d":"2026-06-04","cms":88,"외":171,"자":1173,"네":95,"카":69,"29":9,"이":30,"기":1,"합":1636},{"d":"2026-06-05","cms":74,"외":61,"자":536,"네":59,"카":22,"29":18,"이":10,"기":1,"합":781},{"d":"2026-06-08","cms":61,"외":127,"자":1437,"네":127,"카":85,"29":37,"이":4,"기":3,"합":1881},{"d":"2026-06-09","cms":84,"외":94,"자":490,"네":67,"카":35,"29":14,"이":12,"기":1,"합":797},{"d":"2026-06-10","cms":55,"외":116,"자":521,"네":47,"카":35,"29":8,"이":10,"기":0,"합":792},{"d":"2026-06-11","cms":87,"외":105,"자":475,"네":46,"카":38,"29":10,"이":12,"기":2,"합":775},{"d":"2026-06-12","cms":71,"외":122,"자":490,"네":44,"카":137,"29":6,"이":5,"기":0,"합":875},{"d":"2026-06-15","cms":63,"외":83,"자":1612,"네":109,"카":128,"29":23,"이":28,"기":4,"합":2050},{"d":"2026-06-16","cms":69,"외":87,"자":543,"네":70,"카":54,"29":17,"이":9,"기":1,"합":850},{"d":"2026-06-17","cms":75,"외":113,"자":423,"네":54,"카":40,"29":13,"이":9,"기":1,"합":728},{"d":"2026-06-18","cms":68,"외":70,"자":467,"네":49,"카":40,"29":9,"이":5,"기":1,"합":709},{"d":"2026-06-19","cms":59,"외":90,"자":426,"네":59,"카":30,"29":7,"이":7,"기":2,"합":680},{"d":"2026-06-22","cms":52,"외":107,"자":1674,"네":109,"카":79,"29":17,"이":11,"기":3,"합":2052},{"d":"2026-06-23","cms":87,"외":100,"자":507,"네":71,"카":30,"29":5,"이":4,"기":1,"합":805},{"d":"2026-06-24","cms":81,"외":103,"자":463,"네":69,"카":27,"29":5,"이":7,"기":2,"합":757},{"d":"2026-06-25","cms":73,"외":93,"자":499,"네":70,"카":25,"29":3,"이":7,"기":2,"합":772},{"d":"2026-06-26","cms":75,"외":128,"자":752,"네":44,"카":25,"29":4,"이":2,"기":3,"합":1033},{"d":"2026-06-29","cms":53,"외":138,"자":1343,"네":112,"카":65,"29":9,"이":4,"기":5,"합":1729},{"d":"2026-06-30","cms":72,"외":150,"자":1127,"네":58,"카":40,"29":2,"이":6,"기":0,"합":1455}],
 "2026-07":[{"d":"2026-07-01","cms":59,"외":99,"자":1479,"네":75,"카":47,"29":12,"이":12,"기":1,"합":1784},{"d":"2026-07-02","cms":71,"외":69,"자":543,"네":93,"카":31,"29":6,"이":5,"기":1,"합":819},{"d":"2026-07-03","cms":74,"외":98,"자":205,"네":54,"카":28,"29":5,"이":6,"기":1,"합":471},{"d":"2026-07-06","cms":64,"외":110,"자":443,"네":117,"카":102,"29":16,"이":9,"기":4,"합":865},{"d":"2026-07-07","cms":107,"외":114,"자":249,"네":71,"카":21,"29":3,"이":3,"기":1,"합":569},{"d":"2026-07-08","cms":59,"외":127,"자":237,"네":72,"카":56,"29":8,"이":7,"기":0,"합":566},{"d":"2026-07-09","cms":68,"외":58,"자":322,"네":59,"카":37,"29":7,"이":8,"기":2,"합":561},{"d":"2026-07-10","cms":42,"외":84,"자":226,"네":49,"카":22,"29":3,"이":6,"기":3,"합":435},{"d":"2026-07-13","cms":88,"외":104,"자":507,"네":127,"카":94,"29":9,"이":1,"기":1,"합":931},{"d":"2026-07-14","cms":79,"외":104,"자":277,"네":48,"카":33,"29":3,"이":4,"기":2,"합":550},{"d":"2026-07-15","cms":80,"외":150,"자":240,"네":57,"카":29,"29":1,"이":1,"기":2,"합":560},{"d":"2026-07-16","cms":75,"외":151,"자":219,"네":51,"카":33,"29":4,"이":5,"기":4,"합":542},{"d":"2026-07-20","cms":88,"외":87,"자":1068,"네":136,"카":111,"29":11,"이":4,"기":10,"합":1515},{"d":"2026-07-21","cms":97,"외":74,"자":288,"네":58,"카":23,"29":3,"이":2,"기":1,"합":546},{"d":"2026-07-22","cms":76,"외":107,"자":260,"네":258,"카":34,"29":3,"이":2,"기":1,"합":741},{"d":"2026-07-23","cms":64,"외":78,"자":293,"네":72,"카":35,"29":2,"이":2,"기":0,"합":546},{"d":"2026-07-24","cms":52,"외":81,"자":240,"네":42,"카":44,"29":4,"이":0,"기":3,"합":466},{"d":"2026-07-27","cms":67,"외":233,"자":1247,"네":78,"카":82,"29":9,"이":0,"기":5,"합":1721},{"d":"2026-07-28","cms":94,"외":80,"자":223,"네":59,"카":30,"29":9,"이":0,"기":4,"합":499},{"d":"2026-07-29","cms":62,"외":105,"자":195,"네":49,"카":19,"29":1,"이":0,"기":2,"합":433},{"d":"2026-07-30","cms":58,"외":72,"자":218,"네":51,"카":34,"29":4,"이":0,"기":5,"합":442},{"d":"2026-07-31","cms":70,"외":89,"자":223,"네":49,"카":15,"29":3,"이":0,"기":2,"합":451}],
-"2026-08":[{"d":"2026-08-03","cms":81,"외":131,"자":835,"네":151,"카":100,"29":10,"이":4,"기":66,"합":1378},{"d":"2026-08-04","cms":97,"외":213,"자":414,"네":75,"카":30,"29":6,"이":1,"기":13,"합":849},{"d":"2026-08-05","cms":87,"외":108,"자":286,"네":49,"카":29,"29":6,"이":6,"기":4,"합":575},{"d":"2026-08-06","cms":51,"외":166,"자":268,"네":61,"카":30,"29":4,"이":4,"기":11,"합":595},{"d":"2026-08-07","cms":35,"외":90,"자":263,"네":58,"카":29,"29":1,"이":3,"기":1,"합":480},{"d":"2026-08-10","cms":62,"외":123,"자":636,"네":136,"카":80,"29":11,"이":6,"기":6,"합":1060},{"d":"2026-08-11","cms":98,"외":127,"자":350,"네":88,"카":49,"29":9,"이":6,"기":1,"합":728},{"d":"2026-08-12","cms":134,"외":216,"자":323,"네":60,"카":37,"29":5,"이":5,"기":2,"합":782},{"d":"2026-08-13","cms":55,"외":51,"자":319,"네":61,"카":30,"29":6,"이":4,"기":0,"합":526},{"d":"2026-08-14","cms":31,"외":35,"자":258,"네":34,"카":45,"29":7,"이":2,"기":0,"합":412},{"d":"2026-08-18","cms":71,"외":183,"자":1861,"네":137,"카":124,"29":30,"이":7,"기":5,"합":2418},{"d":"2026-08-19","cms":71,"외":170,"자":312,"네":65,"카":50,"29":4,"이":3,"기":3,"합":678},{"d":"2026-08-20","cms":70,"외":97,"자":181,"네":51,"카":39,"29":6,"이":8,"기":2,"합":454},{"d":"2026-08-21","cms":65,"외":120,"자":285,"네":63,"카":48,"29":9,"이":4,"기":0,"합":594},{"d":"2026-08-24","cms":75,"외":133,"자":755,"네":113,"카":143,"29":7,"이":2,"기":11,"합":1031},{"d":"2026-08-25","cms":92,"외":99,"자":271,"네":103,"카":39,"29":4,"이":3,"기":5,"합":616},{"d":"2026-08-26","cms":56,"외":135,"자":220,"네":62,"카":47,"29":1,"이":10,"기":2,"합":477},{"d":"2026-08-27","cms":57,"외":88,"자":226,"네":68,"카":44,"29":0,"이":5,"기":3,"합":491},{"d":"2026-08-28","cms":43,"외":88,"자":165,"네":50,"카":43,"29":0,"이":6,"기":4,"합":399}]
-};
-
-// ── 월별 집계는 DAILY에서 자동 합산 ──
-// 📌 업데이트 방법: DAILY 객체에 일별 데이터만 추가하면 월별 누적 자동 반영
-const MONTHS = ["2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08"];
-function sumKey(month, key) {
-  return (DAILY[month] || []).reduce((a, r) => a + (r[key] || 0), 0);
-}
-const MONTHLY = {
-  months: MONTHS,
-  대형CMS: MONTHS.map(m => sumKey(m, 'cms')),
-  대형외:  MONTHS.map(m => sumKey(m, '외')),
-  소형: {
-    자사몰: MONTHS.map(m => sumKey(m, '자')),
-    네이버: MONTHS.map(m => sumKey(m, '네')),
-    카카오: MONTHS.map(m => sumKey(m, '카')),
-    "29CM": MONTHS.map(m => sumKey(m, '29')),
-    이베이: MONTHS.map(m => sumKey(m, '이')),
-    기타:   MONTHS.map(m => sumKey(m, '기')),
-  }
+"2026-08":[{"d":"2026-08-03","cms":81,"외":131,"자":835,"네":151,"카":100,"29":10,"이":4,"기":66,"합":1378},{"d":"2026-08-04","cms":97,"외":213,"자":414,"네":75,"카":30,"29":6,"이":1,"기":13,"합":849},{"d":"2026-08-05","cms":87,"외":108,"자":286,"네":49,"카":29,"29":6,"이":6,"기":4,"합":575},{"d":"2026-08-06","cms":51,"외":166,"자":268,"네":61,"카":30,"29":4,"이":4,"기":11,"합":595},{"d":"2026-08-07","cms":35,"외":90,"자":263,"네":58,"카":29,"29":1,"이":3,"기":1,"합":480},{"d":"2026-08-10","cms":62,"외":123,"자":636,"네":136,"카":80,"29":11,"이":6,"기":6,"합":1060},{"d":"2026-08-11","cms":98,"외":127,"자":350,"네":88,"카":49,"29":9,"이":6,"기":1,"합":728},{"d":"2026-08-12","cms":134,"외":216,"자":323,"네":60,"카":37,"29":5,"이":5,"기":2,"합":782},{"d":"2026-08-13","cms":55,"외":51,"자":319,"네":61,"카":30,"29":6,"이":4,"기":0,"합":526},{"d":"2026-08-14","cms":31,"외":35,"자":258,"네":34,"카":45,"29":7,"이":2,"기":0,"합":412},{"d":"2026-08-18","cms":71,"외":183,"자":1861,"네":137,"카":124,"29":30,"이":7,"기":5,"합":2418},{"d":"2026-08-19","cms":71,"외":170,"자":312,"네":65,"카":50,"29":4,"이":3,"기":3,"합":678},{"d":"2026-08-20","cms":70,"외":97,"자":181,"네":51,"카":39,"29":6,"이":8,"기":2,"합":454},{"d":"2026-08-21","cms":65,"외":120,"자":285,"네":63,"카":48,"29":9,"이":4,"기":0,"합":594},{"d":"2026-08-24","cms":75,"외":133,"자":755,"네":113,"카":143,"29":7,"이":2,"기":11,"합":1239},{"d":"2026-08-25","cms":92,"외":99,"자":271,"네":103,"카":39,"29":4,"이":3,"기":5,"합":616},{"d":"2026-08-26","cms":56,"외":135,"자":220,"네":62,"카":47,"29":1,"이":10,"기":2,"합":533},{"d":"2026-08-27","cms":57,"외":88,"자":226,"네":68,"카":44,"29":0,"이":5,"기":3,"합":491},{"d":"2026-08-28","cms":43,"외":88,"자":165,"네":50,"카":43,"29":0,"이":6,"기":4,"합":399},{"d":"2026-08-31","cms":59,"외":130,"자":604,"네":135,"카":119,"29":6,"이":10,"기":4,"합":1067}]
 };
 
 MONTHLY.대형합계 = MONTHLY.months.map((_,i) => MONTHLY.대형CMS[i] + MONTHLY.대형외[i]);
@@ -97,13 +110,15 @@ MONTHLY.소형합계 = MONTHLY.months.map((_,i) =>
   MONTHLY.소형.자사몰[i]+MONTHLY.소형.네이버[i]+MONTHLY.소형.카카오[i]+
   MONTHLY.소형["29CM"][i]+MONTHLY.소형.이베이[i]+MONTHLY.소형.기타[i]);
 MONTHLY.합계 = MONTHLY.months.map((_,i) => MONTHLY.대형합계[i]+MONTHLY.소형합계[i]);
+
 const LATEST = MONTHLY.months.length - 1;
 function delta(cur,prev){ if(prev==null)return null; const d=cur-prev,pct=((d/prev)*100).toFixed(1); return{d,pct,cls:d>=0?'up':'down',arrow:d>=0?'▲':'▼'}; }
 function fmt(n){ return n.toLocaleString(); }
 </script>
+
 <div class="header">
   <div class="header-logo">
-    <img src="data:image/png;base64,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" alt="TERAROSA" style="height:44px;display:block;">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASUAAAAyCAYAAAAaw83gAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAALiMAAC4jAXilP3YAAAAHdElNRQfqCBQECRfBGI8fAAAAEGNhTnYAAAGhAAAAogAAADcAAAAs6zDTogAAFkRJREFUeNrtnXuU3VV1xz/3zkxm8mLy4sIVCIEbAgFCJgoJaAG1BRevSqsVRVqBVdvaat/4aGttV9XSl7aoFKR1rZZWKl0LEBEp8lDLK4ankhAIkwcJJM0kISHJZGYyj/7xPb/Mmd/93d9vn/uYm5H5rnVXMjP3nnt+5+yzz97fs/c+uVKxcCzQRnOwG3jd/T8HzAVmjtN3HwS2AYPdW7cDUCoWAKYBBdefemAI6AP2Av3AcPR99YTr+xTgaKClij5uAwZC+ua+E2A2MKuOjzMI7Af2oXkaqfeYub7ngaOAZcBy4AzgeGAeMBWN5yBwANgFbAGeB1YCT7mfh+rVN9enHDDH9eVM17cT0LxOB9pdn/qAHcCrwGrXn1XAK8DBeo7XeMtWK/DvwHxgpG5PYUML8FXgS97v/gi4wj1II5FDk3cV8Frsb8uBr6FJqAcGgV6gB1gHrCoVC48BG/EUYp3QBdyCFGsIeoHfQIutGlwDfJz6zdtB4A1gK7AWeKxULPwY2E6NCspTRqcAHwQuARahBZ+2ER2LFMXFSEltBB4AbisVC09SgyLwlNGJwPuA9wKLgU7X10p4i+vTRUhJbQZ+CPxXqVh41P2OOslYF/B1N04hCJatVmAB0sTNwLzYz0eNY1/y7vnjmA4spH5Kycd70MLdAtwN3FwqFtZQn4UGcDYS0mqwAlhZKhaqEeK5NHbe+pFy+iZwa6lY2Aphi80bo07g14FPIKuoGkxFSmMx8CHgVuBLpWJhS5X9mgl8xPXpJKqz0jvcZ08CPgDcCVwPrK1yTuPjtgJYWuV4BclWPru9hmIk4+fDoU/1RgtaDJ8Avo2stTZv8qtFK1JK1WI54ab5eKEdLYi/Bm4H3gFjFkwqvPcVkXV+PdUrpDjmAX8A/CeyJkz9KhUL0fuKwFeAf0AWWz1ogyOQkrsdeHfIWFXAuMpWs5XSmx0l5Cp+DGipUXDmUb2VhPvsvBo+Px7IAz8H/Bvhi20OogquItlCrhXnIffmtIB+HQn8E1IgjbDMlwA3A28PHKs45lG9lYT7rFm2JpVS8zET+Hski1DSwDmO1sUR0PKBcBtbhAAAAABJRU5ErkJggg==" alt="TERAROSA" style="height:44px;display:block;">
   </div>
   <div class="header-divider"></div>
   <div class="header-text">
@@ -115,121 +130,406 @@ function fmt(n){ return n.toLocaleString(); }
     </div>
   </div>
 </div>
+
 <div class="month-nav">
   <label>📅 기준월</label>
   <select id="month-sel" onchange="setMonth(this.value)"></select>
 </div>
+
 <div class="tab-bar">
   <div class="tab active" onclick="switchTab('daily',this)">📅 일별 현황 (당월)</div>
   <div class="tab" onclick="switchTab('monthly',this)">📊 월별 현황 (누적)</div>
 </div>
-<div id="panel-monthly" class="tab-panel">
-<div class="container">
-  <div class="kpi-row">
-    <div class="kpi"><div class="kpi-label">월 전체 접수</div><div class="kpi-val" id="kpi-total">—<span>건</span></div><div class="kpi-delta" id="kpi-total-d"></div></div>
-    <div class="kpi"><div class="kpi-label">대형 접수 (CMS + 지점·대량·기타)</div><div class="kpi-val" id="kpi-large">—<span>건</span></div><div class="kpi-delta" id="kpi-large-d"></div></div>
-    <div class="kpi"><div class="kpi-label">소형 접수 (자사몰 + 외부채널)</div><div class="kpi-val" id="kpi-small">—<span>건</span></div><div class="kpi-delta" id="kpi-small-d"></div></div>
-  </div>
-  <div class="card"><div class="section-title">월별 전체 접수건수 추이</div><div class="chart-wrap" style="height:220px"><canvas id="c-trend"></canvas></div><p class="note">※ 기준월 포인트 강조</p></div>
-  <div class="grid-2">
-    <div class="card"><div class="section-title">대형 / 소형 구성 추이</div><div class="chart-wrap" style="height:240px"><canvas id="c-stack"></canvas></div></div>
-    <div class="card"><div class="section-title" id="pie-title">당월 소형 채널 비중</div><div class="chart-wrap" style="height:240px"><canvas id="c-pie"></canvas></div></div>
-  </div>
-  <div class="card"><div class="section-title" id="ch-bar-title">당월 소형 채널별 접수건수</div><div class="chart-wrap" style="height:180px"><canvas id="c-chbar"></canvas></div></div>
-  <div class="card"><div class="section-title">소형 채널별 월별 추이</div><div class="chart-wrap" style="height:260px"><canvas id="c-multiline"></canvas></div></div>
-  <div class="card">
-    <div class="section-title">월별 상세 현황표</div>
-    <table><thead><tr><th>월</th><th>도매몰</th><th>도매몰 외</th><th>대형계</th><th>자사몰</th><th>네이버</th><th>카카오</th><th>29CM</th><th>이베이</th><th>기타</th><th>소형계</th><th style="background:#0d2a45">합계</th></tr></thead>
-    <tbody id="detail-tbody"></tbody><tfoot id="detail-tfoot"></tfoot></table>
-    <p class="note">※ 기타 = 현대M포인트몰 + KBPAY + KREAM + 토스쇼핑 + 고향사랑기부제</p>
-  </div>
-</div>
-</div>
+
 <div id="panel-daily" class="tab-panel active">
 <div class="container">
   <div class="day-kpi-row" id="day-kpi-row"></div>
-  <div class="card"><div class="section-title" id="day-trend-title">일별 전체 접수건수 추이</div><div class="chart-wrap" style="height:240px"><canvas id="c-day-trend"></canvas></div><p class="note">※ 1,000건 이상 기준선 표시 / 마우스 오버 시 채널별 상세</p></div>
-  <div class="card"><div class="section-title" id="day-stack-title">일별 채널 구성</div><div class="chart-wrap" style="height:260px"><canvas id="c-day-stack"></canvas></div></div>
+  <div class="card">
+    <div class="section-title" id="day-trend-title">일별 전체 접수건수 추이</div>
+    <div class="chart-wrap" style="height:240px"><canvas id="c-day-trend"></canvas></div>
+    <p class="note">※ 1,000건 이상 기준선 표시 / 마우스 오버 시 채널별 상세</p>
+  </div>
+  <div class="card">
+    <div class="section-title" id="day-stack-title">일별 채널 구성</div>
+    <div class="chart-wrap" style="height:260px"><canvas id="c-day-stack"></canvas></div>
+  </div>
   <div class="card">
     <div class="section-title" id="day-table-title">일별 상세 현황표</div>
-    <table><thead><tr><th>날짜</th><th>도매몰</th><th>도매몰 외</th><th>대형계</th><th>자사몰</th><th>네이버</th><th>카카오</th><th>29CM</th><th>이베이</th><th>기타</th><th>소형계</th><th style="background:#0d2a45">합계</th></tr></thead>
-    <tbody id="day-tbody"></tbody><tfoot id="day-tfoot"></tfoot></table>
+    <table>
+      <thead><tr>
+        <th>날짜</th><th>도매몰</th><th>도매몰 외</th><th>대형계</th>
+        <th>자사몰</th><th>네이버</th><th>카카오</th><th>29CM</th><th>이베이</th><th>기타</th>
+        <th>소형계</th><th style="background:#0d2a45">합계</th>
+      </tr></thead>
+      <tbody id="day-tbody"></tbody>
+      <tfoot id="day-tfoot"></tfoot>
+    </table>
     <p class="note">※ 1,000건 이상 행 강조 표시 | 기타 = 현대M포인트몰 + KBPAY + KREAM + 토스쇼핑 + 고향사랑기부제</p>
   </div>
 </div>
 </div>
+
+<div id="panel-monthly" class="tab-panel">
+<div class="container">
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">월 전체 접수</div>
+      <div class="kpi-val" id="kpi-total">—<span>건</span></div>
+      <div class="kpi-delta" id="kpi-total-d"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">대형 접수 (CMS + 지점·대량·기타)</div>
+      <div class="kpi-val" id="kpi-large">—<span>건</span></div>
+      <div class="kpi-delta" id="kpi-large-d"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">소형 접수 (자사몰 + 외부채널)</div>
+      <div class="kpi-val" id="kpi-small">—<span>건</span></div>
+      <div class="kpi-delta" id="kpi-small-d"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">월별 전체 접수건수 추이</div>
+    <div class="chart-wrap" style="height:220px"><canvas id="c-trend"></canvas></div>
+    <p class="note">※ 기준월 포인트 강조</p>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-title">대형 / 소형 구성 추이</div>
+      <div class="chart-wrap" style="height:240px"><canvas id="c-stack"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="section-title" id="pie-title">당월 소형 채널 비중</div>
+      <div class="chart-wrap" style="height:240px"><canvas id="c-pie"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title" id="ch-bar-title">당월 소형 채널별 접수건수</div>
+    <div class="chart-wrap" style="height:180px"><canvas id="c-chbar"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="section-title">소형 채널별 월별 추이</div>
+    <div class="chart-wrap" style="height:260px"><canvas id="c-multiline"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="section-title">월별 상세 현황표</div>
+    <table>
+      <thead><tr>
+        <th>월</th><th>도매몰</th><th>도매몰 외</th><th>대형계</th>
+        <th>자사몰</th><th>네이버</th><th>카카오</th><th>29CM</th><th>이베이</th><th>기타</th>
+        <th>소형계</th><th style="background:#0d2a45">합계</th>
+      </tr></thead>
+      <tbody id="detail-tbody"></tbody>
+      <tfoot id="detail-tfoot"></tfoot>
+    </table>
+    <p class="note">※ 기타 = 현대M포인트몰 + KBPAY + KREAM + 토스쇼핑 + 고향사랑기부제</p>
+  </div>
+</div>
+</div>
+
 <script>
-function dow(d){ return ['(일)','(월)','(화)','(수)','(목)','(금)','(토)'][new Date(d).getDay()]; }
 const PAL = { 자사몰:'#2a78d6', 네이버:'#eb6834', 카카오:'#1baf7a', '29CM':'#eda100', 이베이:'#e87ba4', 기타:'#008300' };
 const PAL_ARR = Object.values(PAL);
-const C_BLUE = '#2a78d6';
+const C_BLUE = '#2a78d6', C_ORG = '#eb6834';
 const gridOpts = { color:'rgba(0,0,0,0.05)', drawTicks:false };
+
 Chart.defaults.font.family = "'Apple SD Gothic Neo','Noto Sans KR',sans-serif";
 Chart.defaults.font.size = 11;
 Chart.defaults.color = '#555';
+
 let curIdx = LATEST;
 let chartTrend, chartStack, chartPie, chartChbar, chartMulti, chartDayTrend, chartDayStack;
+
 const sel = document.getElementById('month-sel');
-MONTHLY.months.forEach((m,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=m+' (기준)'; if(i===LATEST) o.selected=true; sel.appendChild(o); });
+MONTHLY.months.forEach((m,i)=>{
+  const o=document.createElement('option');
+  o.value=i; o.textContent=m+' (기준)';
+  if(i===LATEST) o.selected=true;
+  sel.appendChild(o);
+});
+
 document.getElementById('hdr-period').textContent='📊 집계기간: '+MONTHLY.months[0]+' ~ '+MONTHLY.months[LATEST];
 document.getElementById('hdr-latest').textContent='최신: '+MONTHLY.months[LATEST];
 document.getElementById('hdr-generated').textContent='생성: '+new Date().toLocaleDateString('ko-KR');
-function switchTab(id,el){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active')); el.classList.add('active'); document.getElementById('panel-'+id).classList.add('active'); }
-function setMonth(val){ curIdx=parseInt(val); renderMonthly(curIdx); renderDaily(curIdx); }
-function renderMonthly(idx){ updateKPI(idx); buildTrend(idx); buildStack(idx); buildPie(idx); buildChbar(idx); buildTable(idx); if(!chartMulti) buildMulti(); }
+
+function switchTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+function setMonth(val) {
+  curIdx = parseInt(val);
+  renderMonthly(curIdx);
+  renderDaily(curIdx);
+}
+
+function renderMonthly(idx) {
+  updateKPI(idx);
+  buildTrend(idx);
+  buildStack(idx);
+  buildPie(idx);
+  buildChbar(idx);
+  buildTable(idx);
+  if(!chartMulti) buildMulti();
+}
+
 function updateKPI(idx){
-  const prev=idx>0?idx-1:null;
-  const set=(vid,did,cur,prv)=>{ document.getElementById(vid).innerHTML=fmt(cur)+'<span>건</span>'; const d=delta(cur,prv),el=document.getElementById(did); if(!d){el.innerHTML='<span class="neutral">전월 없음</span>';return;} el.innerHTML=`<span class="${d.cls}">${d.arrow} ${fmt(Math.abs(d.d))}건 (${d.pct}%) vs 전월</span>`; };
+  const prev = idx>0?idx-1:null;
+  const set = (vid,did,cur,prv)=>{
+    document.getElementById(vid).innerHTML=fmt(cur)+'<span>건</span>';
+    const d=delta(cur,prv), el=document.getElementById(did);
+    if(!d){el.innerHTML='<span class="neutral">전월 없음</span>';return;}
+    el.innerHTML=`<span class="${d.cls}">${d.arrow} ${fmt(Math.abs(d.d))}건 (${d.pct}%) vs 전월</span>`;
+  };
   set('kpi-total','kpi-total-d',MONTHLY.합계[idx],prev!=null?MONTHLY.합계[prev]:null);
   set('kpi-large','kpi-large-d',MONTHLY.대형합계[idx],prev!=null?MONTHLY.대형합계[prev]:null);
   set('kpi-small','kpi-small-d',MONTHLY.소형합계[idx],prev!=null?MONTHLY.소형합계[prev]:null);
 }
+
 function buildTrend(idx){
   if(chartTrend) chartTrend.destroy();
-  chartTrend=new Chart(document.getElementById('c-trend'),{type:'line',data:{labels:MONTHLY.months,datasets:[{data:MONTHLY.합계,borderColor:C_BLUE,backgroundColor:'rgba(42,120,214,0.08)',borderWidth:2,tension:0.3,fill:true,pointRadius:MONTHLY.months.map((_,i)=>i===idx?7:4),pointBackgroundColor:MONTHLY.months.map((_,i)=>i===idx?C_BLUE:'rgba(42,120,214,0.3)'),pointBorderColor:'#fff',pointBorderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>` 합계 ${fmt(ctx.parsed.y)}건`,afterBody:items=>{const i=items[0].dataIndex;return[` 대형 ${fmt(MONTHLY.대형합계[i])}건`,` 소형 ${fmt(MONTHLY.소형합계[i])}건`];}}}},scales:{x:{grid:gridOpts,ticks:{maxRotation:0}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}});
+  chartTrend = new Chart(document.getElementById('c-trend'),{
+    type:'line',
+    data:{labels:MONTHLY.months,datasets:[{
+      data:MONTHLY.합계,borderColor:C_BLUE,backgroundColor:'rgba(42,120,214,0.08)',
+      borderWidth:2,tension:0.3,fill:true,
+      pointRadius:MONTHLY.months.map((_,i)=>i===idx?7:4),
+      pointBackgroundColor:MONTHLY.months.map((_,i)=>i===idx?C_BLUE:'rgba(42,120,214,0.3)'),
+      pointBorderColor:'#fff',pointBorderWidth:2,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,
+        callbacks:{label:ctx=>` 합계 ${fmt(ctx.parsed.y)}건`,
+          afterBody:items=>{const i=items[0].dataIndex;
+            return[` 대형 ${fmt(MONTHLY.대형합계[i])}건`,` 소형 ${fmt(MONTHLY.소형합계[i])}건`];}}}},
+      scales:{x:{grid:gridOpts,ticks:{maxRotation:0}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
+  });
 }
+
 function buildStack(idx){
   if(chartStack) chartStack.destroy();
-  const bw=MONTHLY.months.map((_,i)=>i===idx?2.5:0),bc=MONTHLY.months.map((_,i)=>i===idx?'#1a3c5e':'transparent');
-  chartStack=new Chart(document.getElementById('c-stack'),{type:'bar',data:{labels:MONTHLY.months,datasets:[{label:'소형',data:MONTHLY.소형합계,backgroundColor:'rgba(42,120,214,0.75)',borderWidth:bw,borderColor:bc,borderRadius:{topLeft:4,topRight:4},borderSkipped:'bottom'},{label:'대형',data:MONTHLY.대형합계,backgroundColor:'rgba(235,104,52,0.75)',borderWidth:0,borderSkipped:'top'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,padding:12}},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:0}},y:{stacked:true,grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}});
+  const bw=MONTHLY.months.map((_,i)=>i===idx?2.5:0);
+  const bc=MONTHLY.months.map((_,i)=>i===idx?'#1a3c5e':'transparent');
+  chartStack = new Chart(document.getElementById('c-stack'),{
+    type:'bar',
+    data:{labels:MONTHLY.months,datasets:[
+      {label:'소형',data:MONTHLY.소형합계,backgroundColor:'rgba(42,120,214,0.75)',borderWidth:bw,borderColor:bc,borderRadius:{topLeft:4,topRight:4},borderSkipped:'bottom'},
+      {label:'대형',data:MONTHLY.대형합계,backgroundColor:'rgba(235,104,52,0.75)',borderWidth:0,borderSkipped:'top'},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{boxWidth:12,padding:12}},
+        tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:0}},y:{stacked:true,grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
+  });
 }
+
 function buildPie(idx){
   document.getElementById('pie-title').textContent=MONTHLY.months[idx]+' 소형 채널 비중';
-  const labels=Object.keys(PAL),vals=labels.map(k=>MONTHLY.소형[k][idx]),total=vals.reduce((a,b)=>a+b,0);
+  const labels=Object.keys(PAL), vals=labels.map(k=>MONTHLY.소형[k][idx]);
+  const total=vals.reduce((a,b)=>a+b,0);
   if(chartPie) chartPie.destroy();
-  chartPie=new Chart(document.getElementById('c-pie'),{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:PAL_ARR,borderWidth:2,borderColor:'#fff',hoverBorderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{boxWidth:12,padding:8,font:{size:11}}},tooltip:{callbacks:{label:ctx=>{const pct=((ctx.parsed/total)*100).toFixed(1);return ` ${ctx.label}: ${fmt(ctx.parsed)}건 (${pct}%)`;}}}}}});
+  chartPie = new Chart(document.getElementById('c-pie'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:PAL_ARR,borderWidth:2,borderColor:'#fff',hoverBorderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'58%',
+      plugins:{legend:{position:'right',labels:{boxWidth:12,padding:8,font:{size:11}}},
+        tooltip:{callbacks:{label:ctx=>{const pct=((ctx.parsed/total)*100).toFixed(1);return ` ${ctx.label}: ${fmt(ctx.parsed)}건 (${pct}%)`;}}}}}}
+  );
 }
+
 function buildChbar(idx){
   document.getElementById('ch-bar-title').textContent=MONTHLY.months[idx]+' 소형 채널별 접수건수';
-  const labels=Object.keys(PAL),vals=labels.map(k=>MONTHLY.소형[k][idx]);
+  const labels=Object.keys(PAL), vals=labels.map(k=>MONTHLY.소형[k][idx]);
   if(chartChbar) chartChbar.destroy();
-  chartChbar=new Chart(document.getElementById('c-chbar'),{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:PAL_ARR,borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${fmt(ctx.parsed.x)}건`}}},scales:{x:{grid:gridOpts,ticks:{callback:v=>fmt(v)}},y:{grid:{display:false}}},animation:{onComplete:e=>{const c=e.chart,ctx2=c.ctx;ctx2.save();c.data.datasets[0].data.forEach((val,i)=>{const bar=c.getDatasetMeta(0).data[i];if(!bar)return;ctx2.font='bold 11px Apple SD Gothic Neo';ctx2.fillStyle='#333';ctx2.textAlign='left';ctx2.textBaseline='middle';ctx2.fillText(fmt(val)+'건',bar.x+6,bar.y);});ctx2.restore();}}}});
+  chartChbar = new Chart(document.getElementById('c-chbar'),{
+    type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:PAL_ARR,borderRadius:4,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${fmt(ctx.parsed.x)}건`}}},
+      scales:{x:{grid:gridOpts,ticks:{callback:v=>fmt(v)}},y:{grid:{display:false}}},
+      animation:{onComplete:e=>{
+        const c=e.chart,ctx2=c.ctx; ctx2.save();
+        c.data.datasets[0].data.forEach((val,i)=>{
+          const bar=c.getDatasetMeta(0).data[i]; if(!bar)return;
+          ctx2.font='bold 11px Apple SD Gothic Neo'; ctx2.fillStyle='#333';
+          ctx2.textAlign='left'; ctx2.textBaseline='middle';
+          ctx2.fillText(fmt(val)+'건',bar.x+6,bar.y);
+        }); ctx2.restore();
+      }}}
+  });
 }
+
 function buildMulti(){
   if(chartMulti) chartMulti.destroy();
-  chartMulti=new Chart(document.getElementById('c-multiline'),{type:'line',data:{labels:MONTHLY.months,datasets:Object.keys(PAL).map((ch,ci)=>({label:ch,data:MONTHLY.소형[ch],borderColor:PAL_ARR[ci],backgroundColor:'transparent',borderWidth:2,pointRadius:4,pointBackgroundColor:PAL_ARR[ci],pointBorderColor:'#fff',pointBorderWidth:1.5,tension:0.25}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{boxWidth:12,padding:14}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},scales:{x:{grid:gridOpts,ticks:{maxRotation:0}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}});
+  chartMulti = new Chart(document.getElementById('c-multiline'),{
+    type:'line',
+    data:{labels:MONTHLY.months,datasets:Object.keys(PAL).map((ch,ci)=>({
+      label:ch,data:MONTHLY.소형[ch],borderColor:PAL_ARR[ci],backgroundColor:'transparent',
+      borderWidth:2,pointRadius:4,pointBackgroundColor:PAL_ARR[ci],
+      pointBorderColor:'#fff',pointBorderWidth:1.5,tension:0.25,
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',labels:{boxWidth:12,padding:14}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},
+      scales:{x:{grid:gridOpts,ticks:{maxRotation:0}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
+  });
 }
+
 function buildTable(idx){
-  const tbody=document.getElementById('detail-tbody');tbody.innerHTML='';
-  MONTHLY.months.forEach((m,i)=>{const cur=i===idx,st=cur?'background:#eef5ff;font-weight:700;':'';tbody.innerHTML+=`<tr style="${st}"><td class="left">${m}${cur?' ◀':''}</td><td>${fmt(MONTHLY.대형CMS[i])}</td><td>${fmt(MONTHLY.대형외[i])}</td><td><strong>${fmt(MONTHLY.대형합계[i])}</strong></td><td>${fmt(MONTHLY.소형.자사몰[i])}</td><td>${fmt(MONTHLY.소형.네이버[i])}</td><td>${fmt(MONTHLY.소형.카카오[i])}</td><td>${fmt(MONTHLY.소형["29CM"][i])}</td><td>${fmt(MONTHLY.소형.이베이[i])}</td><td>${fmt(MONTHLY.소형.기타[i])}</td><td><strong>${fmt(MONTHLY.소형합계[i])}</strong></td><td style="background:#f0f5ff"><strong>${fmt(MONTHLY.합계[i])}</strong></td></tr>`;});
+  const tbody=document.getElementById('detail-tbody');
+  tbody.innerHTML='';
+  MONTHLY.months.forEach((m,i)=>{
+    const cur=i===idx, st=cur?'background:#eef5ff;font-weight:700;':'';
+    tbody.innerHTML+=`<tr style="${st}">
+      <td class="left">${m}${cur?' ◀':''}</td>
+      <td>${fmt(MONTHLY.대형CMS[i])}</td><td>${fmt(MONTHLY.대형외[i])}</td><td><strong>${fmt(MONTHLY.대형합계[i])}</strong></td>
+      <td>${fmt(MONTHLY.소형.자사몰[i])}</td><td>${fmt(MONTHLY.소형.네이버[i])}</td><td>${fmt(MONTHLY.소형.카카오[i])}</td>
+      <td>${fmt(MONTHLY.소형["29CM"][i])}</td><td>${fmt(MONTHLY.소형.이베이[i])}</td><td>${fmt(MONTHLY.소형.기타[i])}</td>
+      <td><strong>${fmt(MONTHLY.소형합계[i])}</strong></td>
+      <td style="background:#f0f5ff"><strong>${fmt(MONTHLY.합계[i])}</strong></td>
+    </tr>`;
+  });
   const s=arr=>arr.reduce((a,b)=>a+b,0);
-  document.getElementById('detail-tfoot').innerHTML=`<tr style="background:#1a3c5e;color:#fff;font-weight:700;"><td class="left">합계</td><td>${fmt(s(MONTHLY.대형CMS))}</td><td>${fmt(s(MONTHLY.대형외))}</td><td>${fmt(s(MONTHLY.대형합계))}</td><td>${fmt(s(MONTHLY.소형.자사몰))}</td><td>${fmt(s(MONTHLY.소형.네이버))}</td><td>${fmt(s(MONTHLY.소형.카카오))}</td><td>${fmt(s(MONTHLY.소형["29CM"]))}</td><td>${fmt(s(MONTHLY.소형.이베이))}</td><td>${fmt(s(MONTHLY.소형.기타))}</td><td>${fmt(s(MONTHLY.소형합계))}</td><td style="background:#0d2a45">${fmt(s(MONTHLY.합계))}</td></tr>`;
+  document.getElementById('detail-tfoot').innerHTML=`<tr style="background:#1a3c5e;color:#fff;font-weight:700;">
+    <td class="left">합계</td>
+    <td>${fmt(s(MONTHLY.대형CMS))}</td><td>${fmt(s(MONTHLY.대형외))}</td><td>${fmt(s(MONTHLY.대형합계))}</td>
+    <td>${fmt(s(MONTHLY.소형.자사몰))}</td><td>${fmt(s(MONTHLY.소형.네이버))}</td><td>${fmt(s(MONTHLY.소형.카카오))}</td>
+    <td>${fmt(s(MONTHLY.소형["29CM"]))}</td><td>${fmt(s(MONTHLY.소형.이베이))}</td><td>${fmt(s(MONTHLY.소형.기타))}</td>
+    <td>${fmt(s(MONTHLY.소형합계))}</td><td style="background:#0d2a45">${fmt(s(MONTHLY.합계))}</td>
+  </tr>`;
 }
+
 function renderDaily(idx){
-  const month=MONTHLY.months[idx],rows=DAILY[month]||[];
-  ['day-trend-title','day-stack-title','day-table-title'].forEach(id=>{document.getElementById(id).textContent={'day-trend-title':month+' 일별 전체 접수건수 추이','day-stack-title':month+' 일별 채널 구성','day-table-title':month+' 일별 상세 현황표'}[id];});
-  if(!rows.length){document.getElementById('day-kpi-row').innerHTML='<div style="color:#999;font-size:13px;padding:20px 0;">해당 월 일별 데이터가 없습니다.</div>';return;}
-  const totals=rows.map(r=>r['합']),maxDay=rows.reduce((a,b)=>b['합']>a['합']?b:a),minDay=rows.reduce((a,b)=>b['합']<a['합']?b:a),avg=Math.round(totals.reduce((a,b)=>a+b,0)/totals.length),over1000=rows.filter(r=>r['합']>=1000).length;
-  document.getElementById('day-kpi-row').innerHTML=`<div class="day-kpi"><div class="day-kpi-label">월 영업일</div><div class="day-kpi-val">${rows.length}<span>일</span></div><div class="day-kpi-sub">일평균 ${fmt(avg)}건</div></div><div class="day-kpi"><div class="day-kpi-label">최고 접수일</div><div class="day-kpi-val">${fmt(maxDay['합'])}<span>건</span></div><div class="day-kpi-sub">${maxDay['d']}</div></div><div class="day-kpi"><div class="day-kpi-label">최저 접수일</div><div class="day-kpi-val">${fmt(minDay['합'])}<span>건</span></div><div class="day-kpi-sub">${minDay['d']}</div></div><div class="day-kpi"><div class="day-kpi-label">1,000건 이상 일수</div><div class="day-kpi-val">${over1000}<span>일</span></div><div class="day-kpi-sub">전체 영업일의 ${((over1000/rows.length)*100).toFixed(0)}%</div></div>`;
+  const month = MONTHLY.months[idx];
+  const rows = DAILY[month] || [];
+
+  ['day-trend-title','day-stack-title','day-table-title'].forEach(id=>{
+    document.getElementById(id).textContent = {
+      'day-trend-title': month+' 일별 전체 접수건수 추이',
+      'day-stack-title': month+' 일별 채널 구성',
+      'day-table-title': month+' 일별 상세 현황표',
+    }[id];
+  });
+
+  if(!rows.length){
+    document.getElementById('day-kpi-row').innerHTML='<div style="color:#999;font-size:13px;padding:20px 0;">해당 월 일별 데이터가 없습니다.</div>';
+    return;
+  }
+
+  const totals = rows.map(r=>r['합']);
+  const maxDay = rows.reduce((a,b)=>b['합']>a['합']?b:a);
+  const minDay = rows.reduce((a,b)=>b['합']<a['합']?b:a);
+  const avg = Math.round(totals.reduce((a,b)=>a+b,0)/totals.length);
+  const over1000 = rows.filter(r=>r['합']>=1000).length;
+  document.getElementById('day-kpi-row').innerHTML=`
+    <div class="day-kpi"><div class="day-kpi-label">월 영업일</div>
+      <div class="day-kpi-val">${rows.length}<span>일</span></div>
+      <div class="day-kpi-sub">일평균 ${fmt(avg)}건</div></div>
+    <div class="day-kpi"><div class="day-kpi-label">최고 접수일</div>
+      <div class="day-kpi-val">${fmt(maxDay['합'])}<span>건</span></div>
+      <div class="day-kpi-sub">${maxDay['d']}</div></div>
+    <div class="day-kpi"><div class="day-kpi-label">최저 접수일</div>
+      <div class="day-kpi-val">${fmt(minDay['합'])}<span>건</span></div>
+      <div class="day-kpi-sub">${minDay['d']}</div></div>
+    <div class="day-kpi"><div class="day-kpi-label">1,000건 이상 일수</div>
+      <div class="day-kpi-val">${over1000}<span>일</span></div>
+      <div class="day-kpi-sub">전체 영업일의 ${((over1000/rows.length)*100).toFixed(0)}%</div></div>
+  `;
+
   if(chartDayTrend) chartDayTrend.destroy();
-  chartDayTrend=new Chart(document.getElementById('c-day-trend'),{type:'line',data:{labels:rows.map(r=>r['d'].slice(5)+' '+dow(r['d'])),datasets:[{label:'일별 합계',data:rows.map(r=>r['합']),borderColor:C_BLUE,backgroundColor:'rgba(42,120,214,0.08)',borderWidth:2,tension:0.3,fill:true,pointRadius:rows.map(r=>r['합']>=1000?7:4),pointBackgroundColor:rows.map(r=>r['합']>=1000?'#e63333':C_BLUE),pointBorderColor:'#fff',pointBorderWidth:1.5}]},plugins:[{id:'refLine',afterDraw(chart){const{ctx:c,chartArea:{left,right},scales:{y}}=chart,yPos=y.getPixelForValue(1000);c.save();c.setLineDash([5,4]);c.strokeStyle='rgba(230,51,51,0.5)';c.lineWidth=1.5;c.beginPath();c.moveTo(left,yPos);c.lineTo(right,yPos);c.stroke();c.fillStyle='rgba(230,51,51,0.7)';c.font='bold 10px sans-serif';c.fillText('1,000건',right-48,yPos-4);c.restore();}}],options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'nearest',intersect:false,callbacks:{title:items=>[rows[items[0].dataIndex]['d']],label:ctx=>` 합계: ${fmt(ctx.parsed.y)}건`,afterBody:items=>{const r=rows[items[0].dataIndex];return[` 도매몰: ${fmt(r.cms)}  도매몰 외: ${fmt(r['외'])}  → ${fmt(r.cms+r['외'])}건`,` 자사몰: ${fmt(r['자'])}  네이버: ${fmt(r['네'])}  카카오: ${fmt(r['카'])}`,` 29CM: ${fmt(r['29'])}  이베이: ${fmt(r['이'])}  기타: ${fmt(r['기'])}`];}}}},scales:{x:{grid:gridOpts,ticks:{maxRotation:45,font:{size:10}}},y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}});
+  chartDayTrend = new Chart(document.getElementById('c-day-trend'),{
+    type:'line',
+    data:{labels:rows.map(r=>r['d'].slice(5)),datasets:[{
+      label:'일별 합계',
+      data:rows.map(r=>r['합']),
+      borderColor:C_BLUE,backgroundColor:'rgba(42,120,214,0.08)',
+      borderWidth:2,tension:0.3,fill:true,
+      pointRadius:rows.map(r=>r['합']>=1000?7:4),
+      pointBackgroundColor:rows.map(r=>r['합']>=1000?'#e63333':C_BLUE),
+      pointBorderColor:'#fff',pointBorderWidth:1.5,
+    }]},
+    plugins:[{
+      id:'refLine',
+      afterDraw(chart){
+        const {ctx:c,chartArea:{left,right},scales:{y}}=chart;
+        const yPos=y.getPixelForValue(1000);
+        c.save(); c.setLineDash([5,4]);
+        c.strokeStyle='rgba(230,51,51,0.5)'; c.lineWidth=1.5;
+        c.beginPath(); c.moveTo(left,yPos); c.lineTo(right,yPos); c.stroke();
+        c.fillStyle='rgba(230,51,51,0.7)'; c.font='bold 10px sans-serif';
+        c.fillText('1,000건',right-48,yPos-4); c.restore();
+      }
+    }],
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{mode:'nearest',intersect:false,callbacks:{
+          title:items=>[rows[items[0].dataIndex]['d']],
+          label:ctx=>` 합계: ${fmt(ctx.parsed.y)}건`,
+          afterBody:items=>{
+            const r=rows[items[0].dataIndex];
+            return[
+              ` 도매몰: ${fmt(r.cms)}  도매몰 외: ${fmt(r['외'])}  → ${fmt(r.cms+r['외'])}건`,
+              ` 자사몰: ${fmt(r['자'])}  네이버: ${fmt(r['네'])}  카카오: ${fmt(r['카'])}`,
+              ` 29CM: ${fmt(r['29'])}  이베이: ${fmt(r['이'])}  기타: ${fmt(r['기'])}`,
+            ];
+          }
+        }}},
+      scales:{
+        x:{grid:gridOpts,ticks:{maxRotation:45,font:{size:10}}},
+        y:{grid:gridOpts,ticks:{callback:v=>fmt(v)}}
+      }
+    }
+  });
+
   if(chartDayStack) chartDayStack.destroy();
-  chartDayStack=new Chart(document.getElementById('c-day-stack'),{type:'bar',data:{labels:rows.map(r=>r['d'].slice(5)+' '+dow(r['d'])),datasets:[{label:'자사몰',data:rows.map(r=>r['자']),backgroundColor:'rgba(42,120,214,0.8)',borderWidth:0},{label:'네이버',data:rows.map(r=>r['네']),backgroundColor:'rgba(235,104,52,0.8)',borderWidth:0},{label:'카카오',data:rows.map(r=>r['카']),backgroundColor:'rgba(27,175,122,0.8)',borderWidth:0},{label:'29CM',data:rows.map(r=>r['29']),backgroundColor:'rgba(237,161,0,0.8)',borderWidth:0},{label:'이베이',data:rows.map(r=>r['이']),backgroundColor:'rgba(232,123,164,0.8)',borderWidth:0},{label:'기타(소형)',data:rows.map(r=>r['기']),backgroundColor:'rgba(0,131,0,0.8)',borderWidth:0},{label:'대형',data:rows.map(r=>r.cms+r['외']),backgroundColor:'rgba(180,180,180,0.7)',borderWidth:0,borderRadius:{topLeft:3,topRight:3}}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:12,padding:10}},tooltip:{mode:'index',intersect:false,callbacks:{title:items=>[rows[items[0].dataIndex]['d']],label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{maxRotation:45,font:{size:10}}},y:{stacked:true,grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}});
-  const tbody=document.getElementById('day-tbody');tbody.innerHTML='';
-  rows.forEach(r=>{const 대형=r.cms+r['외'],소형=r['자']+r['네']+r['카']+r['29']+r['이']+r['기'],big=r['합']>=1000;tbody.innerHTML+=`<tr class="${big?'alert-row':''}"><td class="left">${r['d']} ${dow(r['d'])}${big?' 🔴':''}</td><td>${fmt(r.cms)}</td><td>${fmt(r['외'])}</td><td><strong>${fmt(대형)}</strong></td><td>${fmt(r['자'])}</td><td>${fmt(r['네'])}</td><td>${fmt(r['카'])}</td><td>${fmt(r['29'])}</td><td>${fmt(r['이'])}</td><td>${fmt(r['기'])}</td><td><strong>${fmt(소형)}</strong></td><td style="background:#f0f5ff"><strong>${fmt(r['합'])}</strong></td></tr>`;});
-  const s=key=>rows.reduce((a,r)=>a+(r[key]||0),0),대형tot=s('cms')+s('외'),소형tot=s('자')+s('네')+s('카')+s('29')+s('이')+s('기');
-  document.getElementById('day-tfoot').innerHTML=`<tr style="background:#1a3c5e;color:#fff;font-weight:700;"><td class="left">합계</td><td>${fmt(s('cms'))}</td><td>${fmt(s('외'))}</td><td>${fmt(대형tot)}</td><td>${fmt(s('자'))}</td><td>${fmt(s('네'))}</td><td>${fmt(s('카'))}</td><td>${fmt(s('29'))}</td><td>${fmt(s('이'))}</td><td>${fmt(s('기'))}</td><td>${fmt(소형tot)}</td><td style="background:#0d2a45">${fmt(s('합'))}</td></tr>`;
+  chartDayStack = new Chart(document.getElementById('c-day-stack'),{
+    type:'bar',
+    data:{labels:rows.map(r=>r['d'].slice(5)),datasets:[
+      {label:'자사몰',data:rows.map(r=>r['자']),backgroundColor:'rgba(42,120,214,0.8)',borderWidth:0},
+      {label:'네이버',data:rows.map(r=>r['네']),backgroundColor:'rgba(235,104,52,0.8)',borderWidth:0},
+      {label:'카카오',data:rows.map(r=>r['카']),backgroundColor:'rgba(27,175,122,0.8)',borderWidth:0},
+      {label:'29CM',data:rows.map(r=>r['29']),backgroundColor:'rgba(237,161,0,0.8)',borderWidth:0},
+      {label:'이베이',data:rows.map(r=>r['이']),backgroundColor:'rgba(232,123,164,0.8)',borderWidth:0},
+      {label:'기타(소형)',data:rows.map(r=>r['기']),backgroundColor:'rgba(0,131,0,0.8)',borderWidth:0},
+      {label:'대형',data:rows.map(r=>r.cms+r['외']),backgroundColor:'rgba(180,180,180,0.7)',borderWidth:0,borderRadius:{topLeft:3,topRight:3}},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{boxWidth:12,padding:10}},
+        tooltip:{mode:'index',intersect:false,callbacks:{
+          title:items=>[rows[items[0].dataIndex]['d']],
+          label:ctx=>` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}건`}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{maxRotation:45,font:{size:10}}},
+        y:{stacked:true,grid:gridOpts,ticks:{callback:v=>fmt(v)}}}}
+  });
+
+  const tbody=document.getElementById('day-tbody');
+  tbody.innerHTML='';
+  rows.forEach(r=>{
+    const 대형=r.cms+r['외'], 소형=r['자']+r['네']+r['카']+r['29']+r['이']+r['기'];
+    const big=r['합']>=1000;
+    tbody.innerHTML+=`<tr class="${big?'alert-row':''}">
+      <td class="left">${r['d']}${big?' 🔴':''}</td>
+      <td>${fmt(r.cms)}</td><td>${fmt(r['외'])}</td><td><strong>${fmt(대형)}</strong></td>
+      <td>${fmt(r['자'])}</td><td>${fmt(r['네'])}</td><td>${fmt(r['카'])}</td>
+      <td>${fmt(r['29'])}</td><td>${fmt(r['이'])}</td><td>${fmt(r['기'])}</td>
+      <td><strong>${fmt(소형)}</strong></td>
+      <td style="background:#f0f5ff"><strong>${fmt(r['합'])}</strong></td>
+    </tr>`;
+  });
+  const s=key=>rows.reduce((a,r)=>a+(r[key]||0),0);
+  const 대형tot=s('cms')+s('외'), 소형tot=s('자')+s('네')+s('카')+s('29')+s('이')+s('기');
+  document.getElementById('day-tfoot').innerHTML=`<tr style="background:#1a3c5e;color:#fff;font-weight:700;">
+    <td class="left">합계</td>
+    <td>${fmt(s('cms'))}</td><td>${fmt(s('외'))}</td><td>${fmt(대형tot)}</td>
+    <td>${fmt(s('자'))}</td><td>${fmt(s('네'))}</td><td>${fmt(s('카'))}</td>
+    <td>${fmt(s('29'))}</td><td>${fmt(s('이'))}</td><td>${fmt(s('기'))}</td>
+    <td>${fmt(소형tot)}</td><td style="background:#0d2a45">${fmt(s('합'))}</td>
+  </tr>`;
 }
+
 renderMonthly(LATEST);
 renderDaily(LATEST);
 </script>
