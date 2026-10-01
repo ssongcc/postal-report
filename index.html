@@ -68,7 +68,7 @@ td.left { text-align: left; }
 .alert-row { background: #fff4f0; }
 .alert-row td { color: #c0392b; font-weight: 700; }
 
-.day-kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.day-kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
 .day-kpi { background: #fff; border-radius: 10px; padding: 14px 18px;
            box-shadow: 0 1px 5px rgba(0,0,0,0.06); }
 .day-kpi-label { font-size: 11px; color: #666; font-weight: 600; margin-bottom: 3px; }
@@ -434,10 +434,13 @@ function renderDaily(idx){
   const minDay = rows.reduce((a,b)=>b['합']<a['합']?b:a);
   const avg = Math.round(totals.reduce((a,b)=>a+b,0)/totals.length);
   const over1000 = rows.filter(r=>r['합']>=1000).length;
+  const monthTotal = totals.reduce((a,b)=>a+b,0);
+  const avgLarge = Math.round(rows.reduce((a,r)=>a+r.cms+r['외'],0)/rows.length);
+  const avgSmall = avg - avgLarge;
   document.getElementById('day-kpi-row').innerHTML=`
     <div class="day-kpi"><div class="day-kpi-label">월 영업일</div>
       <div class="day-kpi-val">${rows.length}<span>일</span></div>
-      <div class="day-kpi-sub">일평균 ${fmt(avg)}건</div></div>
+      <div class="day-kpi-sub">월 합계 ${fmt(monthTotal)}건</div></div>
     <div class="day-kpi"><div class="day-kpi-label">최고 접수일</div>
       <div class="day-kpi-val">${fmt(maxDay['합'])}<span>건</span></div>
       <div class="day-kpi-sub">${maxDay['d']} ${dow(maxDay['d'])}</div></div>
@@ -447,6 +450,9 @@ function renderDaily(idx){
     <div class="day-kpi"><div class="day-kpi-label">1,000건 이상 일수</div>
       <div class="day-kpi-val">${over1000}<span>일</span></div>
       <div class="day-kpi-sub">전체 영업일의 ${((over1000/rows.length)*100).toFixed(0)}%</div></div>
+    <div class="day-kpi"><div class="day-kpi-label">일평균 접수</div>
+      <div class="day-kpi-val">${fmt(avg)}<span>건</span></div>
+      <div class="day-kpi-sub">대형 ${fmt(avgLarge)} · 소형 ${fmt(avgSmall)}</div></div>
   `;
 
   if(chartDayTrend) chartDayTrend.destroy();
